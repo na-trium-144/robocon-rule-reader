@@ -224,13 +224,11 @@ const RuleItemActive = (props: { rule: Rule }) => {
             sx={{ mt: 2, width: "100%" }}
           >
             {rule.comments.map((c, i) => (
-              <>
-                <Link key={i} legacyBehavior href={`/?cid=${c.cid}`}>
-                  <ListItemButton dense>
-                    <Typography variant="body2">{c.text}</Typography>
-                  </ListItemButton>
+              <ListItem dense key={i}>
+                <Link href={`/?cid=${c.cid}`}>
+                  <Typography variant="body2">{c.text}</Typography>
                 </Link>
-              </>
+              </ListItem>
             ))}
           </List>
         </Paper>
