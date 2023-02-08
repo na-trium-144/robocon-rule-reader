@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -10,6 +11,9 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "next/link";
+import AutoScroller from "components/scroller";
+import { useRouter } from "next/router";
+import { Element as ScrollElement } from "react-scroll";
 
 interface Comment {
   text: string[];
@@ -83,6 +87,83 @@ const rulebook: Rule[] = [
     ],
     comments: [],
   },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.6",
+    text: [
+      "スタートゾーン",
+      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
+    ],
+    comments: [],
+  },
+  {
+    num: "1.7",
+    text: ["aaaaa"],
+    comments: [],
+  },
 ];
 
 const RuleItem = (props: { rule: Rule; onClick: () => void }) => {
@@ -135,19 +216,20 @@ const RuleItemActive = (props: { rule: Rule }) => {
           <List
             subheader={
               <ListSubheader>
-              <Typography variant="subtitle2">
-                コメント ({rule.comments.length})
-              </Typography>
+                <Typography variant="subtitle2">
+                  コメント ({rule.comments.length})
+                </Typography>
               </ListSubheader>
             }
             sx={{ mt: 2, width: "100%" }}
           >
-            {rule.comments.map((c, i) => (<>
-              <Link key={i} legacyBehavior href={`/#${c.cid}` /* ← スクロールはするがAppBarに隠れてしまう */}>
-                <ListItemButton dense>
-                  <Typography variant="body2">{c.text}</Typography>
-                </ListItemButton>
-              </Link>
+            {rule.comments.map((c, i) => (
+              <>
+                <Link key={i} legacyBehavior href={`/?cid=${c.cid}`}>
+                  <ListItemButton dense>
+                    <Typography variant="body2">{c.text}</Typography>
+                  </ListItemButton>
+                </Link>
               </>
             ))}
           </List>
@@ -158,7 +240,11 @@ const RuleItemActive = (props: { rule: Rule }) => {
 };
 
 export default function RuleBook() {
+  const { query } = useRouter();
   const [selectedRuleNum, setSelectedRuleNum] = useState<string>("");
+  useEffect(() => {
+    setSelectedRuleNum(query.num);
+  }, [query]);
   return (
     <div
       sx={{ width: "100%", height: "100%" }}
@@ -166,24 +252,28 @@ export default function RuleBook() {
         setSelectedRuleNum("");
       }}
     >
+      <AutoScroller id={query.num} />
       <Typography variant="h5" sx={{ p: 2 }}>
         ルールブック原文
       </Typography>
       <List sx={{ width: "100%" }}>
-        {rulebook.map((rule, i) =>
-          selectedRuleNum !== rule.num ? (
-            <RuleItem
-              key={i}
-              rule={rule}
-              onClick={(event) => {
-                event.stopPropagation();
-                setSelectedRuleNum(rule.num);
-              }}
-            />
-          ) : (
-            <RuleItemActive key={i} rule={rule} />
-          )
-        )}
+        {rulebook.map((rule, i) => (
+          <>
+            <ScrollElement id={rule.num} />
+            {selectedRuleNum !== rule.num ? (
+              <RuleItem
+                key={i}
+                rule={rule}
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  setSelectedRuleNum(rule.num);
+                }}
+              />
+            ) : (
+              <RuleItemActive key={i} rule={rule} />
+            )}
+          </>
+        ))}
       </List>
     </div>
   );
