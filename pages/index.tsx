@@ -6,17 +6,22 @@ import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 
-const comments = [
+interface Comment {
+  text: string[];
+  cid: number;
+}
+const comments: Comment[] = [
   {
+    cid:0 ,
     text: "手動操縦/自動操縦かは問わない",
   },
-  {
+  {cid:1 ,
     text: "うさぎロボットは、フィールド内の全てのエリア。ゾーン、橋に入ること ができます。",
   },
-  { text: "うさぎは上空を含む相手チームのエリアへの立ち入りは 禁止" },
-  { text: "うさぎは堀エリアに接地することはできません。" },
-  { text: "うさぎはリングを拾うことができる" },
-  { text: "うさぎはawaのポールにリングを投げ入れることができる" },
+  { cid:2 ,text: "うさぎは上空を含む相手チームのエリアへの立ち入りは 禁止" },
+  { cid:3 ,text: "うさぎは堀エリアに接地することはできません。" },
+  { cid:4 ,text: "うさぎはリングを拾うことができる" },
+  { cid:5 ,text: "うさぎはawaのポールにリングを投げ入れることができる" },
 ];
 export default function Home() {
   return (
@@ -27,7 +32,7 @@ export default function Home() {
       <List sx={{ width: "100%" }}>
         {comments.map((m, i) => (
           <>
-            <ListItemButton key={i} sx={{ py: 0 }}>
+            <ListItemButton key={i} id={m.cid.toString()} sx={{ py: 0 }}>
               <ListItemText primary={m.text} />
             </ListItemButton>
           </>
