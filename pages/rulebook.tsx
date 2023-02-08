@@ -27,7 +27,7 @@ interface Rule {
 const rulebook: Rule[] = [
   {
     num: "1.1",
-    text: ["チーム", "試合は赤チームと青チームで行います。"],
+    text: ["長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト", "試合は赤チームと青チームで行います。"],
     comments: [],
   },
   {
@@ -171,9 +171,9 @@ const RuleItem = (props: { rule: Rule; onClick: () => void }) => {
   return (
     <>
       <ListItemButton key={rule.num} onClick={onClick}>
-        <Grid container alignItems="flex-start" spacing={1}>
+        <Grid container alignItems="baseline" spacing={1}>
           <Grid item>
-            <Typography variant="body1" nowrap>
+            <Typography variant="h6" nowrap>
               {rule.num}
             </Typography>
           </Grid>
@@ -197,9 +197,9 @@ const RuleItemActive = (props: { rule: Rule }) => {
     <>
       <ListItem key={rule.num}>
         <Paper elevation={3} sx={{ padding: 1, width: "100%" }}>
-          <Grid container alignItems="flex-start" spacing={1}>
+          <Grid container alignItems="baseline" spacing={1}>
             <Grid item>
-              <Typography variant="body1" nowrap>
+              <Typography variant="h6" nowrap>
                 {rule.num}
               </Typography>
             </Grid>
