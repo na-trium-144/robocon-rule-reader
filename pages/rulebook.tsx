@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
+import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
@@ -195,8 +196,8 @@ const RuleItemActive = (props: { rule: Rule }) => {
   const { rule } = props;
   return (
     <>
-      <ListItem key={rule.num}>
-        <Paper elevation={3} sx={{ padding: 1, width: "100%" }}>
+      <ListItem key={rule.num} disablePadding>
+        <Paper elevation={3} sx={{ p: 1, width: "100%" }}>
           <Grid container alignItems="baseline" spacing={1}>
             <Grid item>
               <Typography variant="h6" nowrap>
@@ -244,14 +245,14 @@ export default function RuleBook() {
     setSelectedRuleNum(query.num);
   }, [query]);
   return (
-    <div
+    <Container
       sx={{ width: "100%", height: "100%" }}
       onClick={() => {
         setSelectedRuleNum("");
       }}
     >
       <AutoScroller id={query.num} />
-      <Typography variant="h5" sx={{ p: 2 }}>
+      <Typography variant="h5">
         ルールブック原文
       </Typography>
       <List sx={{ width: "100%" }}>
@@ -273,6 +274,6 @@ export default function RuleBook() {
           </>
         ))}
       </List>
-    </div>
+    </Container>
   );
 }
