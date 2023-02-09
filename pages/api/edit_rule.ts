@@ -19,12 +19,8 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse) {
       .catch((err) => {
         status = 500;
         console.log(err);
-      })
-      .finally(
-        void (async () => {
-          await prisma.$disconnect();
-        })
-      );
+      });
+    await prisma.$disconnect();
     res.status(status).send("");
   })(req, res);
 }

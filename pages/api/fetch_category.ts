@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Category, categoryInclude } from "lib/types";
 
-export default function fetchComments(
+export default function fetchCategories(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -15,12 +15,8 @@ export default function fetchComments(
       .catch((err) => {
         status = 500;
         console.log(err);
-      })
-      .finally(
-        void (async () => {
-          await prisma.$disconnect();
-        })
-      );
+      });
+    await prisma.$disconnect();
     res.status(status).json(data);
   })(req, res);
 }

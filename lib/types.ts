@@ -22,6 +22,15 @@ const category = Prisma.validator<Prisma.CategoryArgs>()({
 });
 export type Category = Prisma.CategoryGetPayload<typeof category>;
 
+export const commentInclude = Prisma.validator<Prisma.CommentInclude>()({
+  category: true,
+});
+const comment = Prisma.validator<Prisma.CommentArgs>()({
+  include: commentInclude,
+});
+export type Comment = Prisma.CommentGetPayload<typeof comment>;
+
 export interface ApiReturnMsg {
+  ok: boolean;
   msg: string;
 }

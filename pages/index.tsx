@@ -30,6 +30,7 @@ export default function Home() {
     }
   }, [query]);
 
+  const collator = new Intl.Collator([], { numeric: true });
   return (
     <Container
       onClick={() => {
@@ -38,36 +39,38 @@ export default function Home() {
     >
       <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
-      {categories.map((g, i) => (
-        <>
-          <Typography variant="h6">{g.name}</Typography>
-          <List sx={{ width: "100%" }}>
-            {g.comments.map((m, i) => (
-              <>
-                <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-                <ListItemButton
-                  dense
-                  selected={activeCid === m.id.toString()}
-                  sx={{ cursor: "default" }}
-                >
-                  <Grid container alignItems="baseline" spacing={1}>
-                    <Grid item>
-                      <Typography variant="body1">{m.text}</Typography>
+      {categories
+        .sort((a, b) => collator.compare(a.name, b.name))
+        .map((g, i) => (
+          <>
+            <Typography variant="h6">{g.name}</Typography>
+            <List sx={{ width: "100%" }}>
+              {g.comments.map((m, i) => (
+                <>
+                  <ScrollElement id={m.id.toString()} name={m.id.toString()} />
+                  <ListItemButton
+                    dense
+                    selected={activeCid === m.id.toString()}
+                    sx={{ cursor: "default" }}
+                  >
+                    <Grid container alignItems="baseline" spacing={1}>
+                      <Grid item>
+                        <Typography variant="body1">{m.text}</Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body1">
+                          <Link href={`/rulebook?num=${m.rule.num}`}>
+                            ({m.rule.num})
+                          </Link>
+                        </Typography>
+                      </Grid>
                     </Grid>
-                    <Grid item>
-                      <Typography variant="body1">
-                        <Link href={`/rulebook?num=${m.rule.num}`}>
-                          ({m.rule.num})
-                        </Link>
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </ListItemButton>
-              </>
-            ))}
-          </List>
-        </>
-      ))}
+                  </ListItemButton>
+                </>
+              ))}
+            </List>
+          </>
+        ))}
     </Container>
   );
 }
