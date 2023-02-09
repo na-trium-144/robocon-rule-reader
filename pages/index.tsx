@@ -40,7 +40,7 @@ export default function Home() {
       <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
       {categories
-        .sort((a, b) => collator.compare(a, b))
+        .sort((a, b) => collator.compare(a.name, b.name))
         .map((g, i) => (
           <>
             <Typography variant="h6">{g.name}</Typography>

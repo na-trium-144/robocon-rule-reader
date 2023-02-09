@@ -112,7 +112,7 @@ export default function RuleBook() {
       <Typography variant="h5">ルールブック原文</Typography>
       <List sx={{ width: "100%" }}>
         {rules
-          .sort((a, b) => collator.compare(a, b))
+          .sort((a, b) => collator.compare(a.num, b.num))
           .map((rule, i) => (
             <>
               <ScrollElement id={rule.num} name={rule.num} />

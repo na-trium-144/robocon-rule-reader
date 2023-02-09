@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import { useApi } from "components/apiprovider";
-import { Rule } from "lib/types";
+import { Rule, Comment } from "lib/types";
 
 const highlighter = (code: string) => {
   const colorSelector = (l: string) => {
@@ -36,7 +36,12 @@ export default function RuleEditor() {
   const [code, setCode] = useState("");
   const { addRule, apiResult, fetchAll } = useApi();
   const ruleParse = async () => {
-    let ruleCurrent = undefined;
+    let ruleCurrent: Rule = {
+      id: 0,
+      num: "",
+      text: "",
+      comments: [],
+    };
     let categoryCurrent = "";
 
     for (let i = 0; i < code.split("\n").length; i++) {
@@ -44,12 +49,13 @@ export default function RuleEditor() {
       if (l.startsWith("#")) {
         if (ruleCurrent != undefined) {
           const ok = await addRule(ruleCurrent);
-          if(!ok){
+          if (!ok) {
             return;
           }
           setCode(code.split("\n").slice(i).join("\n"));
         }
         ruleCurrent = {
+          id: 0,
           num: "",
           text: "",
           comments: [],
@@ -61,16 +67,19 @@ export default function RuleEditor() {
         categoryCurrent = l.slice(1).trim();
       } else if (l.startsWith("-")) {
         ruleCurrent.comments.push({
+          id: 0,
           text: l.slice(1).trim(),
-          category: { name: categoryCurrent },
+          category: { id: 0, name: categoryCurrent },
+          categoryId: 0,
+          ruleId: 0,
         });
       } else {
         // skip
       }
     }
-    if (ruleCurrent != undefined) {
+    if (ruleCurrent.num !== "") {
       const ok = await addRule(ruleCurrent);
-      if(!ok){
+      if (!ok) {
         return;
       }
       setCode("");
@@ -106,7 +115,12 @@ export default function RuleEditor() {
           }}
         />
       </Paper>
-      <Button variant="contained" onClick={() => {void ruleParse();}}>
+      <Button
+        variant="contained"
+        onClick={() => {
+          void ruleParse();
+        }}
+      >
         インポート
       </Button>
       <span>{apiResult.msg}</span>
