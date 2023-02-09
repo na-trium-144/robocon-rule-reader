@@ -12,12 +12,8 @@ export default function fetchRules(req: NextApiRequest, res: NextApiResponse) {
       .catch((err) => {
         status = 500;
         console.log(err);
-      })
-      .finally(
-        void (async () => {
-          await prisma.$disconnect();
-        })
-      );
+      });
+    await prisma.$disconnect();
     res.status(status).json(data);
   })(req, res);
 }

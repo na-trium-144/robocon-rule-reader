@@ -16,7 +16,7 @@ import Link from "next/link";
 const pages = [
   { name: "概要", href: "/" },
   { name: "原文", href: "/rulebook" },
-  { name: "インポート", href: "/import" },
+  { name: "インポート", href: "/editor" },
   { name: "エクスポート", href: "/export" },
 ];
 const title = "Rule-Reader";

@@ -10,7 +10,7 @@ export default function addRule(
   void (async (req, res) => {
     const data = req.body as Rule;
     let status = 200;
-    const ret: ApiReturnMsg = { msg: "" };
+    const ret: ApiReturnMsg = { ok: true, msg: "" };
     const rule = await prisma.rule
       .create({
         data: {
@@ -24,17 +24,15 @@ export default function addRule(
           err.code === "P2002"
         ) {
           status = 400;
-          ret.msg = "Unique constraint failed";
+          ret.ok = false;
+          ret.msg = "ルール番号が重複しています";
         } else {
           status = 500;
+          ret.ok = false;
+          ret.msg = "サーバーエラー";
           console.log(err);
         }
-      })
-      .finally(
-        void (async () => {
-          await prisma.$disconnect();
-        })
-      );
+      });
     for (const c of data.comments) {
       if (status === 500) {
         break;
@@ -69,13 +67,9 @@ export default function addRule(
         .catch((err) => {
           status = 500;
           console.log(err);
-        })
-        .finally(
-          void (async () => {
-            await prisma.$disconnect();
-          })
-        );
+        });
     }
+    await prisma.$disconnect();
     res.status(status).json(ret);
   })(req, res);
 }

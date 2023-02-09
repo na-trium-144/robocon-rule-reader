@@ -1,10 +1,11 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { Rule, Category, ApiReturnMsg } from "lib/types";
+
 interface ApiContextI {
   fetchAll: () => void;
   rules: Rule[];
   categories: Category[];
-  addRule: (rule: Rule) => void;
+  addRule: Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
 const ApiContext = createContext<ApiContextI>(null as never);
@@ -26,15 +27,15 @@ export function ApiProvider(props: { children: any }) {
       setCategories(resData);
     })();
   };
-  const addRule = (rule: Rule) => {
-    void (async () => {
-      const res = await fetch("/api/add_rule", {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rule),
-      });
-      setApiResult((await res.json()) as ApiReturnMsg);
-    })();
+  const addRule = async (rule: Rule) => {
+    const res = await fetch("/api/add_rule", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rule),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
   };
   useEffect(fetchAll, []);
 

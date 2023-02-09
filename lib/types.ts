@@ -23,5 +23,6 @@ const category = Prisma.validator<Prisma.CategoryArgs>()({
 export type Category = Prisma.CategoryGetPayload<typeof category>;
 
 export interface ApiReturnMsg {
+  ok: boolean;
   msg: string;
 }
