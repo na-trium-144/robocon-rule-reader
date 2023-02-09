@@ -16,148 +16,7 @@ import AutoScroller from "components/scroller";
 import { useRouter } from "next/router";
 import { Element as ScrollElement } from "react-scroll";
 import { Rule } from "lib/types";
-
-const rulebook: Rule[] = [
-  {
-    num: "1.1",
-    text: ["長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト", "試合は赤チームと青チームで行います。"],
-    comments: [],
-  },
-  {
-    num: "1.2",
-    text: [
-      "ロボット",
-      "各チームはうさぎロボットとぞうロボットをそれぞれ 1 台ずつ、最大 2 台のロボットを製作できます。 手動操縦/自動操縦かは問いま せん。",
-    ],
-    comments: [
-      {
-        cid: 0,
-        text: "手動操縦/自動操縦かは問わない",
-      },
-    ],
-  },
-  {
-    num: "1.3",
-    text: [
-      "うさぎロボット (うさぎ)",
-      "うさぎロボットは、フィールド内の全てのエリア。ゾーン、橋に入ること ができます。ただし上空を含む相手チームのエリアへの立ち入りは 禁止です。また堀エリアに接地することはできません。 うさぎはリングを拾うことができます。またアンコールワットエリアのポ ールにリングを投げ入れることができます。",
-    ],
-    comments: [
-      {
-        cid: 1,
-        text: "うさぎロボットは、フィールド内の全てのエリア。ゾーン、橋に入ること ができます。",
-      },
-      {
-        cid: 2,
-        text: "うさぎは上空を含む相手チームのエリアへの立ち入りは 禁止",
-      },
-      { cid: 3, text: "うさぎは堀エリアに接地することはできません。" },
-      { cid: 4, text: "うさぎはリングを拾うことができる" },
-      { cid: 5, text: "うさぎはawaのポールにリングを投げ入れることができる" },
-    ],
-  },
-  {
-    num: "1.4",
-    text: [
-      "ぞうロボット (ぞう)",
-      "ぞうロボットはフィールド内のレッド・サイドエリアあるいはブルー・サイ ドエリア、堀、橋に入ることができます。ぞうはアンコールワットエリ ア、相手チームのエリアへ上空を含み入ることができません。また 堀エリアと橋に接地することはできません。 ぞうはリングを拾うことができます。またアンコールワットエリアのポー ルにリングを投げ入れることができます。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.5",
-    text: [
-      "フィールド",
-      "フィールドは、ロボットが競技を行う場所全体のことを指します。 12,000mm × 12,000mm の正方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.6",
-    text: [
-      "スタートゾーン",
-      "スタートゾーンは、試合開始時にロボットを置く場所です。フィール ドには、各チームのロボット用に 1 つずつスタート ゾーンがありま す。 1,500mm×1,000mm の長方形です。",
-    ],
-    comments: [],
-  },
-  {
-    num: "1.7",
-    text: ["aaaaa"],
-    comments: [],
-  },
-];
+import { useApi } from "components/apiprovider";
 
 const RuleItem = (props: { rule: Rule; onClick: () => void }) => {
   const { rule, onClick } = props;
@@ -172,7 +31,7 @@ const RuleItem = (props: { rule: Rule; onClick: () => void }) => {
           </Grid>
           <Grid item xs>
             <Box>
-              {rule.text.map((line, i) => (
+              {rule.text.split("\n").map((line, i) => (
                 <Typography variant="body1" key={i}>
                   {line}
                 </Typography>
@@ -198,7 +57,7 @@ const RuleItemActive = (props: { rule: Rule }) => {
             </Grid>
             <Grid item xs>
               <Box>
-                {rule.text.map((line, i) => (
+                {rule.text.split("\n").map((line, i) => (
                   <Typography variant="body1" key={i}>
                     {line}
                   </Typography>
@@ -218,7 +77,7 @@ const RuleItemActive = (props: { rule: Rule }) => {
           >
             {rule.comments.map((c, i) => (
               <ListItem dense key={i}>
-                <Link href={`/?cid=${c.cid}`}>
+                <Link href={`/?cid=${c.id}`}>
                   <Typography variant="body2">{c.text}</Typography>
                 </Link>
               </ListItem>
@@ -236,6 +95,7 @@ export default function RuleBook() {
   useEffect(() => {
     setSelectedRuleNum(query.num);
   }, [query]);
+  const { rules } = useApi();
   return (
     <Container
       sx={{ width: "100%", height: "100%" }}
@@ -248,7 +108,7 @@ export default function RuleBook() {
         ルールブック原文
       </Typography>
       <List sx={{ width: "100%" }}>
-        {rulebook.map((rule, i) => (
+        {rules.map((rule, i) => (
           <>
             <ScrollElement id={rule.num} />
             {selectedRuleNum !== rule.num ? (

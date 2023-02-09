@@ -1,13 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Rule } from "lib/types";
+import { Rule, ApiReturnMsg } from "lib/types";
 
 export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
   void (async (req, res) => {
     const data = req.body as Rule;
     let status = 200;
-    let msg = "";
+    const ret: ApiReturnMsg = {msg: ""};
     const rule: Rule = await prisma.rule
       .create({
         data: {
@@ -21,7 +21,7 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
           err.code === "P2002"
         ) {
           status = 400;
-          msg = "Unique constraint failed";
+          ret.msg = "Unique constraint failed";
         }else{
           status = 500;
           console.log(err);
@@ -67,6 +67,6 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
           })
         );
     }
-    res.status(status).json({msg: msg});
+    res.status(status).json(ret);
   })(req, res);
 }

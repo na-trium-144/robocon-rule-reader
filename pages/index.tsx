@@ -17,60 +17,13 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import * as React from "react";
 import { Element as ScrollElement } from "react-scroll";
-
-interface Comment {
-  text: string[];
-  cid: number;
-  ruleNum: string;
-}
-interface Category {
-  name: string;
-  comments: Comment[];
-}
-const categories: Category[] = [
-  {
-    name: "ロボット共通",
-    comments: [
-      {
-        cid: 0,
-        ruleNum: "1.2",
-        text: "手動操縦/自動操縦かは問わない",
-      },
-    ],
-  },
-  {
-    name: "うさぎ",
-    comments: [
-      {
-        cid: 1,
-        ruleNum: "1.3",
-        text: "うさぎロボットは、フィールド内の全てのエリア。ゾーン、橋に入ること ができます。",
-      },
-      {
-        cid: 2,
-        ruleNum: "1.3",
-        text: "うさぎは上空を含む相手チームのエリアへの立ち入りは 禁止",
-      },
-      {
-        cid: 3,
-        ruleNum: "1.3",
-        text: "うさぎは堀エリアに接地することはできません。",
-      },
-      { cid: 4, ruleNum: "1.3", text: "うさぎはリングを拾うことができる" },
-      {
-        cid: 5,
-        ruleNum: "1.3",
-        text: "うさぎはawaのポールにリングを投げ入れることができる",
-      },
-    ],
-  },
-  { name: "ぞう", comments: [] },
-];
+import { useApi } from "components/apiprovider";
 
 export default function Home() {
   const { query } = useRouter();
   const [activeCid, setActiveCid] = useState<string | undefined>();
   const [clickedCid, setClickedCid] = useState<string | undefined>();
+  const { categories } = useApi();
   useEffect(() => {
     setActiveCid(query.cid);
   }, [query]);
@@ -89,10 +42,10 @@ export default function Home() {
           <List sx={{ width: "100%" }}>
             {g.comments.map((m, i) => (
               <>
-                <ScrollElement id={m.cid.toString()} />
+                <ScrollElement id={m.id.toString()} />
                 <ListItemButton
                   dense
-                  selected={activeCid === m.cid.toString()}
+                  selected={activeCid === m.id.toString()}
                   sx={{ cursor: "default" }}
                 >
                   <Grid container alignItems="baseline" spacing={1}>
@@ -101,8 +54,8 @@ export default function Home() {
                     </Grid>
                     <Grid item>
                       <Typography variant="body1">
-                        <Link href={`/rulebook?num=${m.ruleNum}`}>
-                          ({m.ruleNum})
+                        <Link href={`/rulebook?num=${m.rule.num}`}>
+                          ({m.rule.num})
                         </Link>
                       </Typography>
                     </Grid>

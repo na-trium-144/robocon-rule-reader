@@ -10,11 +10,18 @@ export const ruleInclude = Prisma.validator<Prisma.RuleInclude>()({
 const rule = Prisma.validator<Prisma.RuleArgs>()({ include: ruleInclude });
 export type Rule = Prisma.RuleGetPayload<typeof rule>;
 
-export const commentInclude = Prisma.validator<Prisma.CommentInclude>()({
-  rule: true,
-  category: true,
+export const categoryInclude = Prisma.validator<Prisma.CategoryInclude>()({
+  comments: {
+    include:{
+      rule: true,
+    }
+  }
 });
-const comment = Prisma.validator<Prisma.CommentArgs>()({
-  include: commentInclude,
+const category = Prisma.validator<Prisma.CategoryArgs>()({
+  include: categoryInclude,
 });
-export type Comment = Prisma.RuleGetPayload<typeof comment>;
+export type Category = Prisma.RuleGetPayload<typeof category>;
+
+export interface ApiReturnMsg{
+  msg: string;
+}

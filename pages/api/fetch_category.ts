@@ -1,16 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
-import { Comment, commentInclude } from "lib/types";
+import { Category, categoryInclude } from "lib/types";
 
 export default function fetchComments(
   req: NextApiRequest,
-  res: NextApiResponse<Comment[]>
+  res: NextApiResponse<Category[]>
 ) {
   void (async (req, res) => {
     let status = 200;
-    const data: Comment[] = await prisma.comment
+    const data: Category[] = await prisma.category
       .findMany({
-        select: commentInclude,
+        include: categoryInclude,
       })
       .catch((err) => {
         status = 500;
