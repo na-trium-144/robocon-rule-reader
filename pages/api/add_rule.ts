@@ -3,12 +3,15 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Rule, ApiReturnMsg } from "lib/types";
 
-export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
+export default function addRule(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiReturnMsg>
+) {
   void (async (req, res) => {
     const data = req.body as Rule;
     let status = 200;
-    const ret: ApiReturnMsg = {msg: ""};
-    const rule: Rule = await prisma.rule
+    const ret: ApiReturnMsg = { msg: "" };
+    const rule = await prisma.rule
       .create({
         data: {
           num: data.num,
@@ -22,7 +25,7 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
         ) {
           status = 400;
           ret.msg = "Unique constraint failed";
-        }else{
+        } else {
           status = 500;
           console.log(err);
         }
@@ -36,6 +39,9 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
       if (status === 500) {
         break;
       }
+      if (rule == undefined) {
+        break;
+      }
       await prisma.comment
         .create({
           data: {
@@ -45,16 +51,19 @@ export default function editRule(req: NextApiRequest, res: NextApiResponse<>) {
                 id: rule.id,
               },
             },
-            category: {
-              connectOrCreate: {
-                where: {
-                  name: c.category.name,
-                },
-                create: {
-                  name: c.category.name,
-                },
-              },
-            },
+            category:
+              c.category == null
+                ? undefined
+                : {
+                    connectOrCreate: {
+                      where: {
+                        name: c.category.name,
+                      },
+                      create: {
+                        name: c.category.name,
+                      },
+                    },
+                  },
           },
         })
         .catch((err) => {

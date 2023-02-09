@@ -6,12 +6,12 @@ import { ApiProvider } from "components/apiprovider";
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({ subsets: ["latin"] });
 
-export default function App({ Component, pageProps }) {
+export default function App(props: { Component: any; pageProps: any }) {
   return (
     <div className={inter.className}>
       <AppBar />
       <ApiProvider>
-        <Component {...pageProps} />
+        <props.Component {...props.pageProps} />
       </ApiProvider>
     </div>
   );

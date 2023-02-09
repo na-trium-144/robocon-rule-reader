@@ -12,16 +12,16 @@ export type Rule = Prisma.RuleGetPayload<typeof rule>;
 
 export const categoryInclude = Prisma.validator<Prisma.CategoryInclude>()({
   comments: {
-    include:{
+    include: {
       rule: true,
-    }
-  }
+    },
+  },
 });
 const category = Prisma.validator<Prisma.CategoryArgs>()({
   include: categoryInclude,
 });
-export type Category = Prisma.RuleGetPayload<typeof category>;
+export type Category = Prisma.CategoryGetPayload<typeof category>;
 
-export interface ApiReturnMsg{
+export interface ApiReturnMsg {
   msg: string;
 }

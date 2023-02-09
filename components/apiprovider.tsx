@@ -4,16 +4,16 @@ interface ApiContextI {
   fetchAll: () => void;
   rules: Rule[];
   categories: Category[];
-  addRule: () => void;
+  addRule: (rule: Rule) => void;
   apiResult: ApiReturnMsg;
 }
-const ApiContext = createContext<ApiContextI>();
-export const useApi = () => (useContext(ApiContext));
+const ApiContext = createContext<ApiContextI>(null as never);
+export const useApi = () => useContext(ApiContext);
 
 export function ApiProvider(props: { children: any }) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [apiResult, setApiResult] = useState<ApiReturnMsg>();
+  const [apiResult, setApiResult] = useState<ApiReturnMsg>({ msg: "" });
   const fetchAll = () => {
     void (async () => {
       const res = await fetch("/api/fetch_rule");

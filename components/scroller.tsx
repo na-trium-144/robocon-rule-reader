@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import * as Scroll from "react-scroll";
 
-export default function AutoScroller(props: { id?: string }) {
+export default function AutoScroller(props: { id: string | null }) {
   useEffect(() => {
-    if (typeof props.id === "string") {
+    if (props.id) {
       setTimeout(() => {
         try {
           Scroll.scroller.scrollTo(props.id as string, {

@@ -2,15 +2,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Rule, ruleInclude } from "lib/types";
 
-export default function fetchRules(
-  req: NextApiRequest,
-  res: NextApiResponse<Rule[]>
-) {
+export default function fetchRules(req: NextApiRequest, res: NextApiResponse) {
   void (async (req, res) => {
     let status = 200;
-    const data: Rule[] = await prisma.rule
+    const data = await prisma.rule
       .findMany({
-        include: ruleInclude
+        include: ruleInclude,
       })
       .catch((err) => {
         status = 500;

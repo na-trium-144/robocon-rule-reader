@@ -18,16 +18,17 @@ import { Element as ScrollElement } from "react-scroll";
 import { Rule } from "lib/types";
 import { useApi } from "components/apiprovider";
 
-const RuleItem = (props: { rule: Rule; onClick: () => void }) => {
+const RuleItem = (props: {
+  rule: Rule;
+  onClick: (event: React.MouseEvent) => void;
+}) => {
   const { rule, onClick } = props;
   return (
     <>
       <ListItemButton key={rule.num} onClick={onClick}>
         <Grid container alignItems="baseline" spacing={1}>
           <Grid item>
-            <Typography variant="h6" nowrap>
-              {rule.num}
-            </Typography>
+            <Typography variant="h6">{rule.num}</Typography>
           </Grid>
           <Grid item xs>
             <Box>
@@ -51,9 +52,7 @@ const RuleItemActive = (props: { rule: Rule }) => {
         <Paper elevation={3} sx={{ p: 1, width: "100%" }}>
           <Grid container alignItems="baseline" spacing={1}>
             <Grid item>
-              <Typography variant="h6" nowrap>
-                {rule.num}
-              </Typography>
+              <Typography variant="h6">{rule.num}</Typography>
             </Grid>
             <Grid item xs>
               <Box>
@@ -92,8 +91,12 @@ const RuleItemActive = (props: { rule: Rule }) => {
 export default function RuleBook() {
   const { query } = useRouter();
   const [selectedRuleNum, setSelectedRuleNum] = useState<string>("");
+  const [scrollRuleNum, setScrollRuleNum] = useState<string>("");
   useEffect(() => {
-    setSelectedRuleNum(query.num);
+    if (typeof query.num === "string") {
+      setSelectedRuleNum(query.num);
+      setScrollRuleNum(query.num);
+    }
   }, [query]);
   const { rules } = useApi();
   return (
@@ -101,16 +104,15 @@ export default function RuleBook() {
       sx={{ width: "100%", height: "100%" }}
       onClick={() => {
         setSelectedRuleNum("");
+        setScrollRuleNum("");
       }}
     >
-      <AutoScroller id={query.num} />
-      <Typography variant="h5">
-        ルールブック原文
-      </Typography>
+      <AutoScroller id={scrollRuleNum} />
+      <Typography variant="h5">ルールブック原文</Typography>
       <List sx={{ width: "100%" }}>
         {rules.map((rule, i) => (
           <>
-            <ScrollElement id={rule.num} />
+            <ScrollElement id={rule.num} name={rule.num} />
             {selectedRuleNum !== rule.num ? (
               <RuleItem
                 key={i}

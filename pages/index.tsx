@@ -21,20 +21,22 @@ import { useApi } from "components/apiprovider";
 
 export default function Home() {
   const { query } = useRouter();
-  const [activeCid, setActiveCid] = useState<string | undefined>();
-  const [clickedCid, setClickedCid] = useState<string | undefined>();
+  const [activeCid, setActiveCid] = useState<string | null>(null);
+  const [clickedCid, setClickedCid] = useState<string | null>(null);
   const { categories } = useApi();
   useEffect(() => {
-    setActiveCid(query.cid);
+    if (typeof query.cid === "string") {
+      setActiveCid(query.cid);
+    }
   }, [query]);
 
   return (
     <Container
       onClick={() => {
-        setActiveCid();
+        setActiveCid(null);
       }}
     >
-      <AutoScroller id={query.cid} />
+      <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
       {categories.map((g, i) => (
         <>
@@ -42,7 +44,7 @@ export default function Home() {
           <List sx={{ width: "100%" }}>
             {g.comments.map((m, i) => (
               <>
-                <ScrollElement id={m.id.toString()} />
+                <ScrollElement id={m.id.toString()} name={m.id.toString()} />
                 <ListItemButton
                   dense
                   selected={activeCid === m.id.toString()}

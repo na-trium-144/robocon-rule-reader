@@ -4,11 +4,11 @@ import { Category, categoryInclude } from "lib/types";
 
 export default function fetchComments(
   req: NextApiRequest,
-  res: NextApiResponse<Category[]>
+  res: NextApiResponse
 ) {
   void (async (req, res) => {
     let status = 200;
-    const data: Category[] = await prisma.category
+    const data = await prisma.category
       .findMany({
         include: categoryInclude,
       })
