@@ -15,16 +15,8 @@ import Link from "next/link";
 import AutoScroller from "components/scroller";
 import { useRouter } from "next/router";
 import { Element as ScrollElement } from "react-scroll";
+import { Rule } from "lib/types";
 
-interface Comment {
-  text: string[];
-  cid: number;
-}
-interface Rule {
-  num: string;
-  text: string[];
-  comments: Comment[];
-}
 const rulebook: Rule[] = [
   {
     num: "1.1",

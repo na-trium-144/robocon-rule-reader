@@ -6,7 +6,7 @@ export default function AutoScroller(props: { id?: string }) {
     if (typeof props.id === "string") {
       setTimeout(() => {
         try {
-          Scroll.scroller.scrollTo(props.id, {
+          Scroll.scroller.scrollTo(props.id as string, {
             duration: 300,
             smooth: true,
             offset: -200,
