@@ -99,6 +99,7 @@ export default function RuleBook() {
     }
   }, [query]);
   const { rules } = useApi();
+  const collator = new Intl.Collator([], { numeric: true });
   return (
     <Container
       sx={{ width: "100%", height: "100%" }}
@@ -110,23 +111,25 @@ export default function RuleBook() {
       <AutoScroller id={scrollRuleNum} />
       <Typography variant="h5">ルールブック原文</Typography>
       <List sx={{ width: "100%" }}>
-        {rules.map((rule, i) => (
-          <>
-            <ScrollElement id={rule.num} name={rule.num} />
-            {selectedRuleNum !== rule.num ? (
-              <RuleItem
-                key={i}
-                rule={rule}
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  setSelectedRuleNum(rule.num);
-                }}
-              />
-            ) : (
-              <RuleItemActive key={i} rule={rule} />
-            )}
-          </>
-        ))}
+        {rules
+          .sort((a, b) => collator.compare(a, b))
+          .map((rule, i) => (
+            <>
+              <ScrollElement id={rule.num} name={rule.num} />
+              {selectedRuleNum !== rule.num ? (
+                <RuleItem
+                  key={i}
+                  rule={rule}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    setSelectedRuleNum(rule.num);
+                  }}
+                />
+              ) : (
+                <RuleItemActive key={i} rule={rule} />
+              )}
+            </>
+          ))}
       </List>
     </Container>
   );

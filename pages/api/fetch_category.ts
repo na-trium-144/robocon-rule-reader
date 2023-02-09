@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Category, categoryInclude } from "lib/types";
 
-export default function fetchComments(
+export default function fetchCategories(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
