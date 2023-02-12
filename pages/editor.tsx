@@ -37,7 +37,7 @@ export default function RuleEditor() {
   const { addRule, apiResult, fetchAll } = useApi();
   const ruleParse = async () => {
     let ruleCurrent: Rule = {
-      id: 0,
+      id: -1,
       num: "",
       text: "",
       comments: [],
@@ -47,7 +47,7 @@ export default function RuleEditor() {
     for (let i = 0; i < code.split("\n").length; i++) {
       const l = code.split("\n")[i];
       if (l.startsWith("#")) {
-        if (ruleCurrent != undefined) {
+        if (ruleCurrent.id != -1) {
           const ok = await addRule(ruleCurrent);
           if (!ok) {
             return;

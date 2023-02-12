@@ -17,6 +17,6 @@ export default function fetchCategories(
         console.log(err);
       });
     await prisma.$disconnect();
-    res.status(status).json(data);
+    res.status(status).json(data || []);
   })(req, res);
 }

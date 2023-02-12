@@ -2,20 +2,15 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Rule, ApiReturnMsg } from "lib/types";
+import {addComment} from "./add_comment";
 
-export default function addRule(
-  req: NextApiRequest,
-  res: NextApiResponse<ApiReturnMsg>
-) {
-  void (async (req, res) => {
-    const data = req.body as Rule;
-    let status = 200;
-    const ret: ApiReturnMsg = { ok: true, msg: "" };
-    const rule = await prisma.rule
+export const addRule = async (rule: Rule) => {
+    const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
+    const retRule = await prisma.rule
       .create({
         data: {
-          num: data.num,
-          text: data.text,
+          num: rule.num,
+          text: rule.text,
         },
       })
       .catch((err) => {
@@ -23,53 +18,33 @@ export default function addRule(
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === "P2002"
         ) {
-          status = 400;
+          ret.status = 400;
           ret.ok = false;
           ret.msg = "ルール番号が重複しています";
         } else {
-          status = 500;
+          ret.status = 500;
           ret.ok = false;
           ret.msg = "サーバーエラー";
           console.log(err);
         }
       });
-    for (const c of data.comments) {
-      if (status === 500) {
-        break;
+    return [retRule, ret];
+};
+export default function addRuleRouter(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiReturnMsg>
+) {
+  void (async (req, res) => {
+    const data = req.body as Rule;
+    let ret: ApiReturnMsg;
+    const [retRule, ret1] = await addRule(data);
+    ret = ret1 as ApiReturnMsg;
+    if(ret.ok){
+      for (const c of data.comments) {
+        ret = await addComment({...c, ruleId: (retRule as Rule).id, rule: retRule as Rule});
       }
-      if (rule == undefined) {
-        break;
-      }
-      await prisma.comment
-        .create({
-          data: {
-            text: c.text,
-            rule: {
-              connect: {
-                id: rule.id,
-              },
-            },
-            category:
-              c.category == null
-                ? undefined
-                : {
-                    connectOrCreate: {
-                      where: {
-                        name: c.category.name,
-                      },
-                      create: {
-                        name: c.category.name,
-                      },
-                    },
-                  },
-          },
-        })
-        .catch((err) => {
-          status = 500;
-          console.log(err);
-        });
     }
     await prisma.$disconnect();
-    res.status(status).json(ret);
+    res.status(ret.status).json(ret);
   })(req, res);
 }
