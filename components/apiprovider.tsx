@@ -18,6 +18,7 @@ export function ApiProvider(props: { children: any }) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [apiResult, setApiResult] = useState<ApiReturnMsg>({
+    status: 200,
     ok: false,
     msg: "",
   });

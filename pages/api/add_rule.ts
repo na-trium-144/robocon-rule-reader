@@ -38,11 +38,10 @@ export default function addRuleRouter(
     const data = req.body as Rule;
     let ret: ApiReturnMsg;
     const [retRule, ret1] = await addRule(data);
-    ret = ret1;
+    ret = ret1 as ApiReturnMsg;
     if(ret.ok){
       for (const c of data.comments) {
-        c.ruleId = (retRule as Rule).id;
-        ret = await addComment(c);
+        ret = await addComment({...c, ruleId: (retRule as Rule).id, rule: retRule as Rule});
       }
     }
     await prisma.$disconnect();

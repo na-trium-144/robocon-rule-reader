@@ -19,7 +19,7 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
-import { Rule, ApiReturnMsg } from "lib/types";
+import { Rule, ApiReturnMsg, Comment } from "lib/types";
 
 export const RuleItem = (props: {
   rule: Rule;
@@ -124,7 +124,7 @@ export const RuleItemActive = (props: {
                       variant="outlined"
                       size="small"
                       icon={<LocalOfferIcon />}
-                      label={c.category.name}
+                      label={c.category != undefined ? c.category.name : ""}
                     />
                   </Grid>
                   <Grid item xs>
@@ -173,7 +173,9 @@ export const RuleItemActive = (props: {
                         id: 0,
                         text: newText,
                         ruleId: rule.id,
+                        rule: rule,
                         category: { id: 0, name: newCategory },
+                        categoryId: 0,
                       });
                     }}
                   >
@@ -224,7 +226,7 @@ export const RuleItemActiveEditing = (props: {
               <Button
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
-                  editRule({ id: rule.id, num: ruleNum, text: ruleText });
+                  editRule({ id: rule.id, num: ruleNum, text: ruleText, comments:rule.comments });
                 }}
               >
                 保存

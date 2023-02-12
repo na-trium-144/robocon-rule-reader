@@ -31,14 +31,14 @@ export const CommentItem = (props: {
       <Typography variant="body1">
         {comment.rule != undefined && (
           <>
-            <Link href={`/rulebook?num=${(comment.rule as Rule).num}`}>
+            <Link href={`/rulebook?num=${comment.rule.num}`}>
               <Button
                 color="secondary"
                 size="small"
                 startIcon={<DescriptionOutlinedIcon />}
                 sx={{ mr: 1, minWidth: 0 }}
               >
-                {(comment.rule as Rule).num}
+                {comment.rule.num}
               </Button>
             </Link>
             {comment.text}
@@ -51,7 +51,7 @@ export const CommentItem = (props: {
                 editButtonClick();
               }}
             >
-              <EditIcon size="inherit" />
+              <EditIcon />
             </IconButton>
           </>
         )}
@@ -73,14 +73,14 @@ export const CommentItemEditing = (props: {
         <Grid item>
           {comment.rule != undefined && (
             <>
-              <Link href={`/rulebook?num=${(comment.rule as Rule).num}`}>
+              <Link href={`/rulebook?num=${comment.rule.num}`}>
                 <Button
                   color="secondary"
                   size="small"
                   startIcon={<DescriptionOutlinedIcon />}
                   sx={{ mr: 1, minWidth: 0 }}
                 >
-                  {(comment.rule as Rule).num}
+                  {comment.rule.num}
                 </Button>
               </Link>
             </>
@@ -108,7 +108,7 @@ export const CommentItemEditing = (props: {
               editComment({ ...comment, text: text });
             }}
           >
-            <CheckIcon size="inherit" />
+            <CheckIcon />
           </IconButton>
         </Grid>
       </Grid>

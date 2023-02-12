@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import AutoScroller from "components/scroller";
 import { useRouter } from "next/router";
 import { Element as ScrollElement } from "react-scroll";
-import { Rule , ApiReturnMsg} from "lib/types";
+import { Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useApi } from "components/apiprovider";
 import {
   RuleItem,
@@ -67,9 +67,9 @@ export default function RuleBook() {
                     setIsEditing(false);
                   }}
                   editRule={(rule: Rule) => {
-                    void (async() => {
+                    void (async () => {
                       const ok = await editRule(rule);
-                      if(ok){
+                      if (ok) {
                         setIsEditing(false);
                         fetchAll();
                       }
@@ -86,13 +86,13 @@ export default function RuleBook() {
                     apiResult.msg = "";
                   }}
                   addComment={(comment: Comment) => {
-                        void (async () => {
-                          const ok = await addComment(comment);
-                          if (ok) {
-                            fetchAll();
-                          }
-                        })();
-                      }}
+                    void (async () => {
+                      const ok = await addComment(comment);
+                      if (ok) {
+                        fetchAll();
+                      }
+                    })();
+                  }}
                 />
               )}
             </>

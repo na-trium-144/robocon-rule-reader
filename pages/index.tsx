@@ -54,7 +54,7 @@ export default function Home() {
                   {editingCid === m.id.toString() ? (
                     <CommentItemEditing
                       isActive={activeCid === m.id.toString()}
-                      comment={m}
+                      comment={{...m, category: g}}
                       key={i}
                       editComment={(comment: Comment) => {
                         void (async () => {
@@ -69,7 +69,7 @@ export default function Home() {
                   ) : (
                     <CommentItem
                       isActive={activeCid === m.id.toString()}
-                      comment={m}
+                      comment={{...m, category: g}}
                       key={i}
                       editButtonClick={() => {
                         setEditingCid(m.id.toString());

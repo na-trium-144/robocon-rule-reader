@@ -24,6 +24,7 @@ export type Category = Prisma.CategoryGetPayload<typeof category>;
 
 export const commentInclude = Prisma.validator<Prisma.CommentInclude>()({
   category: true,
+  rule: true,
 });
 const comment = Prisma.validator<Prisma.CommentArgs>()({
   include: commentInclude,
