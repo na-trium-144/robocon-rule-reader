@@ -31,6 +31,7 @@ const comment = Prisma.validator<Prisma.CommentArgs>()({
 export type Comment = Prisma.CommentGetPayload<typeof comment>;
 
 export interface ApiReturnMsg {
+  status: number;
   ok: boolean;
   msg: string;
 }
