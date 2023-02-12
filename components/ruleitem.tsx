@@ -11,6 +11,13 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Chip from "@mui/material/Chip";
+import Badge from "@mui/material/Badge";
+import EditIcon from "@mui/icons-material/Edit";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg } from "lib/types";
 
@@ -21,21 +28,35 @@ export const RuleItem = (props: {
   const { rule, onClick } = props;
   return (
     <>
-      <ListItemButton key={rule.num} onClick={onClick}>
-        <Grid container alignItems="baseline" spacing={1}>
-          <Grid item>
-            <Typography variant="h6">{rule.num}</Typography>
-          </Grid>
-          <Grid item xs>
-            <Box>
-              {rule.text.split("\n").map((line, i) => (
-                <Typography variant="body1" key={i}>
-                  {line}
-                </Typography>
-              ))}
-            </Box>
-          </Grid>
-        </Grid>
+      <ListItemButton dense key={rule.num} onClick={onClick}>
+        <Typography
+          variant="body1"
+          sx={{
+            textOverflow: "ellipsis",
+            width: "100%",
+            overflow: "auto",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Typography variant="h6" component="span" sx={{ mr: 1 }}>
+            {rule.num}
+          </Typography>
+          {rule.comments.length >= 1 && (
+            <Badge
+              badgeContent={rule.comments.length}
+              overlap="circular"
+              color="warning"
+              sx={{ mr: 1 }}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+            >
+              <ChatIcon color="action" />
+            </Badge>
+          )}
+          {rule.text}
+        </Typography>
       </ListItemButton>
     </>
   );
@@ -43,13 +64,22 @@ export const RuleItem = (props: {
 
 export const RuleItemActive = (props: {
   rule: Rule;
-  editButtonClick: (event: React.MouseEvent) => void;
+  editButtonClick: () => void;
+  addComment: (comment: Comment) => void;
 }) => {
-  const { rule, editButtonClick } = props;
+  const { rule, editButtonClick, addComment } = props;
+  const [newCategory, setNewCategory] = useState<string>("");
+  const [newText, setNewText] = useState<string>("");
   return (
     <>
-      <ListItem key={rule.num} disablePadding>
-        <Paper elevation={3} sx={{ p: 1, width: "100%" }}>
+      <ListItem
+        key={rule.num}
+        disablePadding
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
             <Grid item>
               <Typography variant="h5">{rule.num}</Typography>
@@ -60,6 +90,7 @@ export const RuleItemActive = (props: {
                   event.stopPropagation();
                   editButtonClick();
                 }}
+                startIcon={<EditIcon />}
               >
                 ルールを編集
               </Button>
@@ -86,11 +117,71 @@ export const RuleItemActive = (props: {
           >
             {rule.comments.map((c, i) => (
               <ListItem dense key={i}>
-                <Link href={`/?cid=${c.id}`}>
-                  <Typography variant="body2">{c.text}</Typography>
-                </Link>
+                <Grid container spacing={1} alignItems="center">
+                  <Grid item>
+                    <Chip
+                      color="warning"
+                      variant="outlined"
+                      size="small"
+                      icon={<LocalOfferIcon />}
+                      label={c.category.name}
+                    />
+                  </Grid>
+                  <Grid item xs>
+                    <Link href={`/?cid=${c.id}`}>
+                      <Typography variant="body2">{c.text}</Typography>
+                    </Link>
+                  </Grid>
+                </Grid>
               </ListItem>
             ))}
+            <ListItem>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={3} md={2} xl={1}>
+                  <TextField
+                    size="small"
+                    color="warning"
+                    variant="standard"
+                    placeholder="Category"
+                    fullWidth
+                    value={newCategory}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setNewCategory(event.target.value);
+                    }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    size="small"
+                    variant="standard"
+                    placeholder="Text"
+                    fullWidth
+                    value={newText}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setNewText(event.target.value);
+                    }}
+                  />
+                </Grid>
+                <Grid item>
+                  <Button
+                    size="small"
+                    color="primary"
+                    sx={{ ml: 1 }}
+                    startIcon={<AddCircleIcon />}
+                    onClick={() => {
+                      addComment({
+                        id: 0,
+                        text: newText,
+                        ruleId: rule.id,
+                        category: { id: 0, name: newCategory },
+                      });
+                    }}
+                  >
+                    追加
+                  </Button>
+                </Grid>
+              </Grid>
+            </ListItem>
           </List>
         </Paper>
       </ListItem>
@@ -109,8 +200,14 @@ export const RuleItemActiveEditing = (props: {
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
   return (
     <>
-      <ListItem key={rule.num} disablePadding>
-        <Paper elevation={3} sx={{ p: 1, width: "100%" }}>
+      <ListItem
+        key={rule.num}
+        disablePadding
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
             <Grid item>
               <TextField
@@ -139,6 +236,7 @@ export const RuleItemActiveEditing = (props: {
                   event.stopPropagation();
                   cancelEditing();
                 }}
+                color="secondary"
               >
                 キャンセル
               </Button>

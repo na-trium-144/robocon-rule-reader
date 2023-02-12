@@ -26,7 +26,7 @@ export default function RuleBook() {
       setScrollRuleNum(query.num);
     }
   }, [query]);
-  const { rules, editRule, fetchAll, apiResult } = useApi();
+  const { rules, editRule, fetchAll, apiResult, addComment } = useApi();
   const collator = new Intl.Collator([], { numeric: true });
   return (
     <Container
@@ -85,6 +85,14 @@ export default function RuleBook() {
                     setIsEditing(true);
                     apiResult.msg = "";
                   }}
+                  addComment={(comment: Comment) => {
+                        void (async () => {
+                          const ok = await addComment(comment);
+                          if (ok) {
+                            fetchAll();
+                          }
+                        })();
+                      }}
                 />
               )}
             </>

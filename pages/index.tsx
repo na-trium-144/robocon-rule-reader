@@ -18,12 +18,14 @@ import { useState, useEffect } from "react";
 import * as React from "react";
 import { Element as ScrollElement } from "react-scroll";
 import { useApi } from "components/apiprovider";
+import { CommentItem, CommentItemEditing } from "components/commentitem";
+import { Comment } from "lib/types";
 
 export default function Home() {
   const { query } = useRouter();
   const [activeCid, setActiveCid] = useState<string | null>(null);
-  const [clickedCid, setClickedCid] = useState<string | null>(null);
-  const { categories } = useApi();
+  const [editingCid, setEditingCid] = useState<string | null>(null);
+  const { categories, editComment, fetchAll } = useApi();
   useEffect(() => {
     if (typeof query.cid === "string") {
       setActiveCid(query.cid);
@@ -35,6 +37,7 @@ export default function Home() {
     <Container
       onClick={() => {
         setActiveCid(null);
+        setEditingCid(null);
       }}
     >
       <AutoScroller id={activeCid} />
@@ -48,24 +51,31 @@ export default function Home() {
               {g.comments.map((m, i) => (
                 <>
                   <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-                  <ListItemButton
-                    dense
-                    selected={activeCid === m.id.toString()}
-                    sx={{ cursor: "default" }}
-                  >
-                    <Grid container alignItems="baseline" spacing={1}>
-                      <Grid item>
-                        <Typography variant="body1">{m.text}</Typography>
-                      </Grid>
-                      <Grid item>
-                        <Typography variant="body1">
-                          <Link href={`/rulebook?num=${m.rule.num}`}>
-                            ({m.rule.num})
-                          </Link>
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </ListItemButton>
+                  {editingCid === m.id.toString() ? (
+                    <CommentItemEditing
+                      isActive={activeCid === m.id.toString()}
+                      comment={m}
+                      key={i}
+                      editComment={(comment: Comment) => {
+                        void (async () => {
+                          const ok = await editComment(comment);
+                          if (ok) {
+                            setEditingCid(null);
+                            fetchAll();
+                          }
+                        })();
+                      }}
+                    />
+                  ) : (
+                    <CommentItem
+                      isActive={activeCid === m.id.toString()}
+                      comment={m}
+                      key={i}
+                      editButtonClick={() => {
+                        setEditingCid(m.id.toString());
+                      }}
+                    />
+                  )}
                 </>
               ))}
             </List>

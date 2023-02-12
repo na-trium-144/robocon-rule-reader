@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { Rule, Category, ApiReturnMsg } from "lib/types";
+import { Rule, Comment, Category, ApiReturnMsg } from "lib/types";
 
 interface ApiContextI {
   fetchAll: () => void;
@@ -7,6 +7,8 @@ interface ApiContextI {
   categories: Category[];
   addRule: (rule: Rule) => Promise<boolean>;
   editRule: (rule: Rule) => Promise<boolean>;
+  editComment: (comment: Comment) => Promise<boolean>;
+  addComment: (comment: Comment) => Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
 const ApiContext = createContext<ApiContextI>(null as never);
@@ -15,7 +17,10 @@ export const useApi = () => useContext(ApiContext);
 export function ApiProvider(props: { children: any }) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [apiResult, setApiResult] = useState<ApiReturnMsg>({ ok: false, msg: "" });
+  const [apiResult, setApiResult] = useState<ApiReturnMsg>({
+    ok: false,
+    msg: "",
+  });
   const fetchAll = () => {
     void (async () => {
       const res = await fetch("/api/fetch_rule");
@@ -48,6 +53,26 @@ export function ApiProvider(props: { children: any }) {
     setApiResult(retMsg);
     return retMsg.ok;
   };
+  const editComment = async (comment: Comment) => {
+    const res = await fetch("/api/edit_comment", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(comment),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
+  const addComment = async (comment: Comment) => {
+    const res = await fetch("/api/add_comment", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(comment),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
   useEffect(fetchAll, []);
 
   return (
@@ -58,6 +83,8 @@ export function ApiProvider(props: { children: any }) {
         categories,
         addRule,
         editRule,
+        editComment,
+        addComment,
         apiResult,
       }}
     >

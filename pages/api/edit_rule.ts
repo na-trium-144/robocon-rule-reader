@@ -40,6 +40,6 @@ export default function editRuleRouter(
     const data = req.body as Rule;
     const ret = await editRule(data);
     await prisma.$disconnect();
-    res.status(status).json(ret);
+    res.status(ret.status).json(ret);
   })(req, res);
 }
