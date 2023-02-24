@@ -34,7 +34,7 @@ export const RuleItem = (props: {
           sx={{
             textOverflow: "ellipsis",
             width: "100%",
-            overflow: "auto",
+            overflow: "hidden",
             whiteSpace: "nowrap",
           }}
         >
