@@ -25,15 +25,21 @@ export const CommentItem = (props: {
   isActive: boolean;
   comment: Comment;
   editButtonClick: () => void;
-  onDrop: () => void;
+  onDrop: (target: Comment) => void;
+  setDraggingCid: (cid: number) => void;
 }) => {
-  const { isActive, comment, editButtonClick, onDrop } = props;
+  const { isActive, comment, editButtonClick, onDrop, setDraggingCid } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: comment.category.name,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
+  useEffect(() => {
+    if(isDragging){
+      setDraggingCid(comment.id);
+    }
+  }, [isDragging, setDraggingCid, comment]);
   const [{ isOver }, drop] = useDrop(
     () => ({
       accept: comment.category.name,

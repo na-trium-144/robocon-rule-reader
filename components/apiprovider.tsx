@@ -9,6 +9,7 @@ interface ApiContextI {
   editRule: (rule: Rule) => Promise<boolean>;
   editComment: (comment: Comment) => Promise<boolean>;
   addComment: (comment: Comment) => Promise<boolean>;
+  setCommentOrder: (comment: Comment) => Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
 const ApiContext = createContext<ApiContextI>(null as never);
@@ -74,6 +75,16 @@ export function ApiProvider(props: { children: any }) {
     setApiResult(retMsg);
     return retMsg.ok;
   };
+  const setCommentOrder = async (comment: Comment) => {
+    const res = await fetch("/api/set_comment_order", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(comment),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
   useEffect(fetchAll, []);
 
   return (
@@ -86,6 +97,7 @@ export function ApiProvider(props: { children: any }) {
         editRule,
         editComment,
         addComment,
+        setCommentOrder,
         apiResult,
       }}
     >
