@@ -48,36 +48,43 @@ export default function Home() {
           <>
             <Typography variant="h6">{g.name}</Typography>
             <List sx={{ width: "100%" }}>
-              {g.comments.map((m, i) => (
-                <>
-                  <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-                  {editingCid === m.id.toString() ? (
-                    <CommentItemEditing
-                      isActive={activeCid === m.id.toString()}
-                      comment={{...m, category: g}}
-                      key={i}
-                      editComment={(comment: Comment) => {
-                        void (async () => {
-                          const ok = await editComment(comment);
-                          if (ok) {
-                            setEditingCid(null);
-                            fetchAll();
-                          }
-                        })();
-                      }}
+              {g.comments
+                .sort((a, b) =>
+                  a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+                )
+                .map((m, i) => (
+                  <>
+                    <ScrollElement
+                      id={m.id.toString()}
+                      name={m.id.toString()}
                     />
-                  ) : (
-                    <CommentItem
-                      isActive={activeCid === m.id.toString()}
-                      comment={{...m, category: g}}
-                      key={i}
-                      editButtonClick={() => {
-                        setEditingCid(m.id.toString());
-                      }}
-                    />
-                  )}
-                </>
-              ))}
+                    {editingCid === m.id.toString() ? (
+                      <CommentItemEditing
+                        isActive={activeCid === m.id.toString()}
+                        comment={{ ...m, category: g }}
+                        key={i}
+                        editComment={(comment: Comment) => {
+                          void (async () => {
+                            const ok = await editComment(comment);
+                            if (ok) {
+                              setEditingCid(null);
+                              fetchAll();
+                            }
+                          })();
+                        }}
+                      />
+                    ) : (
+                      <CommentItem
+                        isActive={activeCid === m.id.toString()}
+                        comment={{ ...m, category: g }}
+                        key={i}
+                        editButtonClick={() => {
+                          setEditingCid(m.id.toString());
+                        }}
+                      />
+                    )}
+                  </>
+                ))}
             </List>
           </>
         ))}

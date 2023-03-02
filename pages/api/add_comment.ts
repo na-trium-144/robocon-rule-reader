@@ -14,6 +14,14 @@ export const addComment = async (c: Comment) => {
             id: c.ruleId,
           },
         },
+        order:
+          (
+            await prisma.comment.findMany({
+              select: { order: true },
+              where: { category: { name: c.category.name } },
+              orderBy: { order: "desc" },
+            })
+          )[0].order + 1,
         category:
           c.category == null
             ? undefined
