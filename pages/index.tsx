@@ -34,46 +34,6 @@ export default function Home() {
       setActiveCid(parseInt(query.cid));
     }
   }, [query]);
-  const [onDrop, setOnDrop] = useState<(destComment: Comment) => () => void>();
-  useEffect(() => {
-    console.error(draggingCid);
-      console.error(categories);
-    setOnDrop(() => (destComment: Comment) => () => {
-      console.error(draggingCid);
-      console.error(categories);
-      console.error(destComment.category.name);
-      const commentsSorted = categories
-        .find((g) => g.name === destComment.category.name)
-        .comments.sort((a, b) =>
-          a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-        );
-      // setDraggingCid((draggingCid) => {
-      if (draggingCid != null) {
-        void (async () => {
-          let newOrder;
-          if (i === 0) {
-            newOrder = destComment.order - 1;
-          } else {
-            newOrder = (commentsSorted[i - 1].order + destComment.order) / 2;
-            console.log(commentsSorted[i - 1].order);
-            console.log(destComment.order);
-          }
-          console.log(`${draggingCid} -> ${newOrder}`);
-          const ok = await setCommentOrder({
-            id: draggingCid,
-            order: newOrder,
-          });
-          if (ok) {
-            fetchAll();
-          }
-        })();
-      } else {
-        console.error("draggingCid is null");
-      }
-      //   return null;
-      // });
-    });
-  }, [setOnDrop, categories, draggingCid, setCommentOrder, fetchAll]);
 
   console.log(draggingCid);
   const collator = new Intl.Collator([], { numeric: true });
@@ -90,51 +50,76 @@ export default function Home() {
         {categories
           .sort((a, b) => collator.compare(a.name, b.name))
           .map((g, i) => (
-            <>
-              <div key={g.name}>
-                <Typography variant="h6">{g.name}</Typography>
-                <List sx={{ width: "100%" }}>
-                  {g.comments
-                    .sort((a, b) =>
-                      a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-                    )
-                    .map((m, i, commentsSorted) => (
-                      <>
-                        <ScrollElement
-                          id={m.id.toString()}
-                          name={m.id.toString()}
-                          key={m}
+            <div key={g.name}>
+              <Typography variant="h6">{g.name}</Typography>
+              <List sx={{ width: "100%" }}>
+                {g.comments
+                  .sort((a, b) =>
+                    a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+                  )
+                  .map((m, i, commentsSorted) => (
+                    <div key={i}>
+                      <ScrollElement
+                        id={m.id.toString()}
+                        name={m.id.toString()}
+                      />
+                      {editingCid === m.id ? (
+                        <CommentItemEditing
+                          isActive={activeCid === m.id}
+                          comment={{ ...m, category: g }}
+                          editComment={(comment: Comment) => {
+                            void (async () => {
+                              const ok = await editComment(comment);
+                              if (ok) {
+                                setEditingCid(null);
+                                fetchAll();
+                              }
+                            })();
+                          }}
                         />
-                        {editingCid === m.id ? (
-                          <CommentItemEditing
-                            isActive={activeCid === m.id}
-                            comment={{ ...m, category: g }}
-                            editComment={(comment: Comment) => {
+                      ) : (
+                        <CommentItem
+                          isActive={activeCid === m.id}
+                          comment={{ ...m, category: g }}
+                          editButtonClick={() => {
+                            setEditingCid(m.id);
+                          }}
+                          setDraggingCid={setDraggingCid}
+                          onDrop={() => {
+                            console.error(draggingCid);
+                            // setDraggingCid((draggingCid) => {
+                            if (draggingCid != null) {
                               void (async () => {
-                                const ok = await editComment(comment);
+                                let newOrder;
+                                if (i === 0) {
+                                  newOrder = m.order - 1;
+                                } else {
+                                  newOrder =
+                                    (commentsSorted[i - 1].order + m.order) / 2;
+                                  console.log(commentsSorted[i - 1].order);
+                                  console.log(m.order);
+                                }
+                                console.log(`${draggingCid} -> ${newOrder}`);
+                                const ok = await setCommentOrder({
+                                  id: draggingCid,
+                                  order: newOrder,
+                                });
                                 if (ok) {
-                                  setEditingCid(null);
                                   fetchAll();
                                 }
                               })();
-                            }}
-                          />
-                        ) : (
-                          <CommentItem
-                            isActive={activeCid === m.id}
-                            comment={{ ...m, category: g }}
-                            editButtonClick={() => {
-                              setEditingCid(m.id);
-                            }}
-                            setDraggingCid={setDraggingCid}
-                            onDrop={onDrop({ ...m, category: g })}
-                          />
-                        )}
-                      </>
-                    ))}
-                </List>
-              </div>
-            </>
+                            } else {
+                              console.error("draggingCid is null");
+                            }
+                            //   return null;
+                            // });
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))}
+              </List>
+            </div>
           ))}
       </Container>
     </DndProvider>
