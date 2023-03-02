@@ -20,6 +20,8 @@ import { Element as ScrollElement } from "react-scroll";
 import { useApi } from "components/apiprovider";
 import { CommentItem, CommentItemEditing } from "components/commentitem";
 import { Comment } from "lib/types";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 export default function Home() {
   const { query } = useRouter();
@@ -34,60 +36,63 @@ export default function Home() {
 
   const collator = new Intl.Collator([], { numeric: true });
   return (
-    <Container
-      onClick={() => {
-        setActiveCid(null);
-        setEditingCid(null);
-      }}
-    >
-      <AutoScroller id={activeCid} />
-      <Typography variant="h5">ルール概要、コメント</Typography>
-      {categories
-        .sort((a, b) => collator.compare(a.name, b.name))
-        .map((g, i) => (
-          <>
-            <Typography variant="h6">{g.name}</Typography>
-            <List sx={{ width: "100%" }}>
-              {g.comments
-                .sort((a, b) =>
-                  a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-                )
-                .map((m, i) => (
-                  <>
-                    <ScrollElement
-                      id={m.id.toString()}
-                      name={m.id.toString()}
-                    />
-                    {editingCid === m.id.toString() ? (
-                      <CommentItemEditing
-                        isActive={activeCid === m.id.toString()}
-                        comment={{ ...m, category: g }}
-                        key={i}
-                        editComment={(comment: Comment) => {
-                          void (async () => {
-                            const ok = await editComment(comment);
-                            if (ok) {
-                              setEditingCid(null);
-                              fetchAll();
-                            }
-                          })();
-                        }}
+    <DndProvider backend={HTML5Backend}>
+      <Container
+        onClick={() => {
+          setActiveCid(null);
+          setEditingCid(null);
+        }}
+      >
+        <AutoScroller id={activeCid} />
+        <Typography variant="h5">ルール概要、コメント</Typography>
+        {categories
+          .sort((a, b) => collator.compare(a.name, b.name))
+          .map((g, i) => (
+            <>
+              <Typography variant="h6">{g.name}</Typography>
+              <List sx={{ width: "100%" }}>
+                {g.comments
+                  .sort((a, b) =>
+                    a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+                  )
+                  .map((m, i) => (
+                    <>
+                      <ScrollElement
+                        id={m.id.toString()}
+                        name={m.id.toString()}
                       />
-                    ) : (
-                      <CommentItem
-                        isActive={activeCid === m.id.toString()}
-                        comment={{ ...m, category: g }}
-                        key={i}
-                        editButtonClick={() => {
-                          setEditingCid(m.id.toString());
-                        }}
-                      />
-                    )}
-                  </>
-                ))}
-            </List>
-          </>
-        ))}
-    </Container>
+                      {editingCid === m.id.toString() ? (
+                        <CommentItemEditing
+                          isActive={activeCid === m.id.toString()}
+                          comment={{ ...m, category: g }}
+                          key={i}
+                          editComment={(comment: Comment) => {
+                            void (async () => {
+                              const ok = await editComment(comment);
+                              if (ok) {
+                                setEditingCid(null);
+                                fetchAll();
+                              }
+                            })();
+                          }}
+                        />
+                      ) : (
+                        <CommentItem
+                          isActive={activeCid === m.id.toString()}
+                          comment={{ ...m, category: g }}
+                          key={i}
+                          editButtonClick={() => {
+                            setEditingCid(m.id.toString());
+                          }}
+                          onDrop={() => {;}}
+                        />
+                      )}
+                    </>
+                  ))}
+              </List>
+            </>
+          ))}
+      </Container>
+    </DndProvider>
   );
 }

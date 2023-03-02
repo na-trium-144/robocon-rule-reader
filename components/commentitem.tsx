@@ -19,15 +19,43 @@ import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Rule, Comment } from "lib/types";
+import { useDrag, useDrop } from "react-dnd";
 
 export const CommentItem = (props: {
   isActive: boolean;
   comment: Comment;
   editButtonClick: () => void;
+  onDrop: () => void;
 }) => {
-  const { isActive, comment, editButtonClick } = props;
+  const { isActive, comment, editButtonClick, onDrop } = props;
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: comment.category.name,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
+  const [{ isOver }, drop] = useDrop(
+    () => ({
+      accept: comment.category.name,
+      drop: onDrop,
+      collect: (monitor) => ({
+        isOver: !!monitor.isOver(),
+      }),
+    }),
+    []
+  );
+
   return (
-    <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
+    <div ref={drop}>
+      <div ref={drag}>
+    {isOver && <>
+      <Box sx={{width: "100%", height: "40px"}} />
+    </>}
+    <ListItemButton
+      dense
+      selected={isActive}
+      sx={{ cursor: "default" }}
+    >
       <Typography variant="body1">
         {comment.rule != undefined && (
           <>
@@ -58,6 +86,8 @@ export const CommentItem = (props: {
         )}
       </Typography>
     </ListItemButton>
+    </div>
+    </div>
   );
 };
 
@@ -112,7 +142,6 @@ export const CommentItemEditing = (props: {
             <CheckIcon />
           </IconButton>
           <span>order: {comment.order}</span>
-          
         </Grid>
       </Grid>
     </ListItem>
