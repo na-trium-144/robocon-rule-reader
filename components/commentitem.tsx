@@ -86,7 +86,6 @@ export const CommentItem = (props: {
                 >
                   <EditIcon />
                 </IconButton>
-                <span>order: {comment.order}</span>
               </>
             )}
           </Typography>
@@ -146,7 +145,6 @@ export const CommentItemEditing = (props: {
           >
             <CheckIcon />
           </IconButton>
-          <span>order: {comment.order}</span>
         </Grid>
       </Grid>
     </ListItem>

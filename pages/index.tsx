@@ -40,20 +40,16 @@ const CategoryView = (props: {
         a.order < b.order ? -1 : a.order > b.order ? 1 : 0
       )
     );
-    console.log("sorted");
   }, [category]);
   const [draggingCid, setDraggingCid] = useState<number | null>(null);
   const [droppedCid, setDroppedCid] = useState<number | null>(null);
   useEffect(() => {
     if (draggingCid != null && droppedCid != null) {
-      console.log(commentsSorted);
-      console.log(draggingCid, droppedCid);
       const droppedCommentIdx = commentsSorted.findIndex(
         (m) => m.id === droppedCid
       );
       const droppedComment = commentsSorted[droppedCommentIdx];
       const previousComment = commentsSorted[droppedCommentIdx - 1];
-      console.error(droppedComment, previousComment);
       void (async () => {
         let newOrder;
         if (previousComment == undefined) {
