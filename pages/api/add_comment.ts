@@ -5,6 +5,15 @@ import { Comment, ApiReturnMsg } from "lib/types";
 
 export const addComment = async (c: Comment) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
+  let newOrder = 0;
+  const comments = await prisma.comment.findMany({
+    select: { order: true },
+    where: { category: { name: c.category.name } },
+    orderBy: { order: "desc" },
+  });
+  if (comments.length >= 1) {
+    newOrder = comments[0].order + 1;
+  }
   await prisma.comment
     .create({
       data: {
@@ -14,14 +23,7 @@ export const addComment = async (c: Comment) => {
             id: c.ruleId,
           },
         },
-        order:
-          (
-            await prisma.comment.findMany({
-              select: { order: true },
-              where: { category: { name: c.category.name } },
-              orderBy: { order: "desc" },
-            })
-          )[0].order + 1,
+        order: newOrder,
         category:
           c.category == null
             ? undefined
