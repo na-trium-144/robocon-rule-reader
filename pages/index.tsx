@@ -23,11 +23,90 @@ import { Comment, Category } from "lib/types";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+const CategoryView = (props: {
+  category: Category;
+  activeCid: number;
+  setActiveCid: (cid: number) => void;
+  editingCid: number;
+  setEditingCid: (cid: number) => void;
+}) => {
+  const { category, activeCid, setActiveCid, editingCid, setEditingCid } =
+    props;
+  const { editComment, fetchAll, setCommentOrder } = useApi();
+
+  const [draggingCid, setDraggingCid] = useState<number | null>(null);
+  console.log(draggingCid);
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <List sx={{ width: "100%" }}>
+        {category.comments
+          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+          .map((m, i, commentsSorted) => (
+            <div key={i}>
+              <ScrollElement id={m.id.toString()} name={m.id.toString()} />
+              {editingCid === m.id ? (
+                <CommentItemEditing
+                  isActive={activeCid === m.id}
+                  comment={{ ...m, category: category }}
+                  editComment={(comment: Comment) => {
+                    void (async () => {
+                      const ok = await editComment(comment);
+                      if (ok) {
+                        setEditingCid(null);
+                        fetchAll();
+                      }
+                    })();
+                  }}
+                />
+              ) : (
+                <CommentItem
+                  isActive={activeCid === m.id}
+                  comment={{ ...m, category: category }}
+                  editButtonClick={() => {
+                    setEditingCid(m.id);
+                  }}
+                  setDraggingCid={setDraggingCid}
+                  onDrop={() => {
+                    console.error(draggingCid);
+                    // setDraggingCid((draggingCid) => {
+                    if (draggingCid != null) {
+                      void (async () => {
+                        let newOrder;
+                        if (i === 0) {
+                          newOrder = m.order - 1;
+                        } else {
+                          newOrder =
+                            (commentsSorted[i - 1].order + m.order) / 2;
+                          console.log(commentsSorted[i - 1].order);
+                          console.log(m.order);
+                        }
+                        console.log(`${draggingCid} -> ${newOrder}`);
+                        const ok = await setCommentOrder({
+                          id: draggingCid,
+                          order: newOrder,
+                        });
+                        if (ok) {
+                          fetchAll();
+                        }
+                      })();
+                    } else {
+                      console.error("draggingCid is null");
+                    }
+                    //   return null;
+                    // });
+                  }}
+                />
+              )}
+            </div>
+          ))}
+      </List>
+    </DndProvider>
+  );
+};
 export default function Home() {
   const { query } = useRouter();
   const [activeCid, setActiveCid] = useState<number | null>(null);
   const [editingCid, setEditingCid] = useState<number | null>(null);
-  const [draggingCid, setDraggingCid] = useState<number | null>(null);
   const { categories, editComment, fetchAll, setCommentOrder } = useApi();
   useEffect(() => {
     if (typeof query.cid === "string") {
@@ -35,93 +114,30 @@ export default function Home() {
     }
   }, [query]);
 
-  console.log(draggingCid);
   const collator = new Intl.Collator([], { numeric: true });
   return (
-    <DndProvider backend={HTML5Backend}>
-      <Container
-        onClick={() => {
-          setActiveCid(null);
-          setEditingCid(null);
-        }}
-      >
-        <AutoScroller id={activeCid} />
-        <Typography variant="h5">ルール概要、コメント</Typography>
-        {categories
-          .sort((a, b) => collator.compare(a.name, b.name))
-          .map((g, i) => (
-            <div key={g.name}>
-              <Typography variant="h6">{g.name}</Typography>
-              <List sx={{ width: "100%" }}>
-                {g.comments
-                  .sort((a, b) =>
-                    a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-                  )
-                  .map((m, i, commentsSorted) => (
-                    <div key={i}>
-                      <ScrollElement
-                        id={m.id.toString()}
-                        name={m.id.toString()}
-                      />
-                      {editingCid === m.id ? (
-                        <CommentItemEditing
-                          isActive={activeCid === m.id}
-                          comment={{ ...m, category: g }}
-                          editComment={(comment: Comment) => {
-                            void (async () => {
-                              const ok = await editComment(comment);
-                              if (ok) {
-                                setEditingCid(null);
-                                fetchAll();
-                              }
-                            })();
-                          }}
-                        />
-                      ) : (
-                        <CommentItem
-                          isActive={activeCid === m.id}
-                          comment={{ ...m, category: g }}
-                          editButtonClick={() => {
-                            setEditingCid(m.id);
-                          }}
-                          setDraggingCid={setDraggingCid}
-                          onDrop={() => {
-                            console.error(draggingCid);
-                            // setDraggingCid((draggingCid) => {
-                            if (draggingCid != null) {
-                              void (async () => {
-                                let newOrder;
-                                if (i === 0) {
-                                  newOrder = m.order - 1;
-                                } else {
-                                  newOrder =
-                                    (commentsSorted[i - 1].order + m.order) / 2;
-                                  console.log(commentsSorted[i - 1].order);
-                                  console.log(m.order);
-                                }
-                                console.log(`${draggingCid} -> ${newOrder}`);
-                                const ok = await setCommentOrder({
-                                  id: draggingCid,
-                                  order: newOrder,
-                                });
-                                if (ok) {
-                                  fetchAll();
-                                }
-                              })();
-                            } else {
-                              console.error("draggingCid is null");
-                            }
-                            //   return null;
-                            // });
-                          }}
-                        />
-                      )}
-                    </div>
-                  ))}
-              </List>
-            </div>
-          ))}
-      </Container>
-    </DndProvider>
+    <Container
+      onClick={() => {
+        setActiveCid(null);
+        setEditingCid(null);
+      }}
+    >
+      <AutoScroller id={activeCid} />
+      <Typography variant="h5">ルール概要、コメント</Typography>
+      {categories
+        .sort((a, b) => collator.compare(a.name, b.name))
+        .map((g, i) => (
+          <div key={g.name}>
+            <Typography variant="h6">{g.name}</Typography>
+            <CategoryView
+              category={g}
+              activeCid={activeCid}
+              setActiveCid={setActiveCid}
+              editingCid={editingCid}
+              setEditingCid={setEditingCid}
+            />
+          </div>
+        ))}
+    </Container>
   );
 }
