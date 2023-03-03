@@ -33,76 +33,86 @@ const CategoryView = (props: {
   const { category, activeCid, setActiveCid, editingCid, setEditingCid } =
     props;
   const { editComment, fetchAll, setCommentOrder } = useApi();
-
+  const [commentsSorted, setCommentsSorted] = useState<Comment[]>([]);
+  useEffect(() => {
+    setCommentsSorted(
+      category.comments.sort((a, b) =>
+        a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+      )
+    );
+    console.log("sorted");
+  }, [category]);
   const [draggingCid, setDraggingCid] = useState<number | null>(null);
-  console.log(draggingCid);
+  const [droppedCid, setDroppedCid] = useState<number | null>(null);
+  useEffect(() => {
+    if (draggingCid != null && droppedCid != null) {
+      console.log(commentsSorted);
+      console.log(draggingCid, droppedCid);
+      const droppedCommentIdx = commentsSorted.findIndex(
+        (m) => m.id === droppedCid
+      );
+      const droppedComment = commentsSorted[droppedCommentIdx];
+      const previousComment = commentsSorted[droppedCommentIdx - 1];
+      console.error(droppedComment, previousComment);
+      void (async () => {
+        let newOrder;
+        if (previousComment == undefined) {
+          newOrder = droppedComment.order - 1;
+        } else {
+          newOrder = (previousComment.order + droppedComment.order) / 2;
+        }
+        const ok = await setCommentOrder({
+          id: draggingCid,
+          order: newOrder,
+        });
+        if (ok) {
+          fetchAll();
+        }
+      })();
+      setDraggingCid(null);
+      setDroppedCid(null);
+    }
+    //   return null;
+    // });
+  }, [draggingCid, droppedCid, commentsSorted]);
   return (
-    <DndProvider backend={HTML5Backend}>
-      <List sx={{ width: "100%" }}>
-        {category.comments
-          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-          .map((m, i, commentsSorted) => (
-            <div key={i}>
-              <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-              {editingCid === m.id ? (
-                <CommentItemEditing
-                  isActive={activeCid === m.id}
-                  comment={{ ...m, category: category }}
-                  editComment={(comment: Comment) => {
-                    void (async () => {
-                      const ok = await editComment(comment);
-                      if (ok) {
-                        setEditingCid(null);
-                        fetchAll();
-                      }
-                    })();
-                  }}
-                />
-              ) : (
-                <CommentItem
-                  isActive={activeCid === m.id}
-                  comment={{ ...m, category: category }}
-                  editButtonClick={() => {
-                    setEditingCid(m.id);
-                  }}
-                  setDraggingCid={() => {
-                    setDraggingCid(m.id);
-                  }}
-                  onDrop={() => {
-                    console.error(draggingCid);
-                    // setDraggingCid((draggingCid) => {
-                    if (draggingCid != null) {
-                      void (async () => {
-                        let newOrder;
-                        if (i === 0) {
-                          newOrder = m.order - 1;
-                        } else {
-                          newOrder =
-                            (commentsSorted[i - 1].order + m.order) / 2;
-                          console.log(commentsSorted[i - 1].order);
-                          console.log(m.order);
-                        }
-                        console.log(`${draggingCid} -> ${newOrder}`);
-                        const ok = await setCommentOrder({
-                          id: draggingCid,
-                          order: newOrder,
-                        });
-                        if (ok) {
-                          fetchAll();
-                        }
-                      })();
-                    } else {
-                      console.error("draggingCid is null");
-                    }
-                    //   return null;
-                    // });
-                  }}
-                />
-              )}
-            </div>
-          ))}
-      </List>
-    </DndProvider>
+    <List sx={{ width: "100%" }}>
+      {commentsSorted.map((m, i) => (
+        <div key={m.id}>
+          <ScrollElement id={m.id.toString()} name={m.id.toString()} />
+          {editingCid === m.id ? (
+            <CommentItemEditing
+              isActive={activeCid === m.id}
+              comment={{ ...m, category: category }}
+              editComment={(comment: Comment) => {
+                void (async () => {
+                  const ok = await editComment(comment);
+                  if (ok) {
+                    setEditingCid(null);
+                    fetchAll();
+                  }
+                })();
+              }}
+            />
+          ) : (
+            <CommentItem
+              isActive={activeCid === m.id}
+              comment={{ ...m, category: category }}
+              editButtonClick={() => {
+                setEditingCid(m.id);
+              }}
+              startDragging={() => {
+                setDraggingCid(m.id);
+                setDroppedCid(null);
+              }}
+              dropped={() => {
+                setDroppedCid(m.id);
+              }}
+            />
+          )}
+        </div>
+      ))}
+    </List>
   );
 };
 export default function Home() {
@@ -126,20 +136,23 @@ export default function Home() {
     >
       <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
-      {categories
-        .sort((a, b) => collator.compare(a.name, b.name))
-        .map((g, i) => (
-          <div key={g.name}>
-            <Typography variant="h6">{g.name}</Typography>
-            <CategoryView
-              category={g}
-              activeCid={activeCid}
-              setActiveCid={setActiveCid}
-              editingCid={editingCid}
-              setEditingCid={setEditingCid}
-            />
-          </div>
-        ))}
+      <Typography variant="body1">ドラッグ&ドロップでコメントを並べ替えできます。</Typography>
+      <DndProvider backend={HTML5Backend}>
+        {categories
+          .sort((a, b) => collator.compare(a.name, b.name))
+          .map((g, i) => (
+            <div key={g.name}>
+              <Typography variant="h6">{g.name}</Typography>
+              <CategoryView
+                category={g}
+                activeCid={activeCid}
+                setActiveCid={setActiveCid}
+                editingCid={editingCid}
+                setEditingCid={setEditingCid}
+              />
+            </div>
+          ))}
+      </DndProvider>
     </Container>
   );
 }

@@ -25,10 +25,10 @@ export const CommentItem = (props: {
   isActive: boolean;
   comment: Comment;
   editButtonClick: () => void;
-  onDrop: (target: Comment) => void;
-  setDraggingCid: () => void;
+  startDragging: () => void;
+  dropped: () => void;
 }) => {
-  const { isActive, comment, editButtonClick, onDrop, setDraggingCid } = props;
+  const { isActive, comment, editButtonClick, startDragging, dropped } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: comment.category.name,
     collect: (monitor) => ({
@@ -36,14 +36,15 @@ export const CommentItem = (props: {
     }),
   }));
   useEffect(() => {
-    if(isDragging){
-      setDraggingCid();
+    if (isDragging) {
+      startDragging();
     }
-  }, [isDragging, setDraggingCid, comment]);
+  }, [isDragging, startDragging]);
   const [{ isOver }, drop] = useDrop(
     () => ({
       accept: comment.category.name,
-      drop: onDrop,
+      drop: dropped, // droppedが変化してもuseDropの中身は変更できないっぽい。
+      //なのでここで呼び出す関数はずっと変更されないものにする必要がある
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
       }),
@@ -53,46 +54,44 @@ export const CommentItem = (props: {
 
   return (
     <div ref={drop}>
-      <div ref={drag}>
-    {isOver && <>
-      <Box sx={{width: "100%", height: "40px"}} />
-    </>}
-    <ListItemButton
-      dense
-      selected={isActive}
-      sx={{ cursor: "default" }}
-    >
-      <Typography variant="body1">
-        {comment.rule != undefined && (
-          <>
-            <Link href={`/rulebook?num=${comment.rule.num}`}>
-              <Button
-                color="secondary"
-                size="small"
-                startIcon={<DescriptionOutlinedIcon />}
-                sx={{ mr: 1, minWidth: 0 }}
-              >
-                {comment.rule.num}
-              </Button>
-            </Link>
-            {comment.text}
-            <IconButton
-              color="primary"
-              size="small"
-              sx={{ ml: 1, mr: 1 }}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                editButtonClick();
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-            <span>order: {comment.order}</span>
-          </>
-        )}
-      </Typography>
-    </ListItemButton>
-    </div>
+      {isOver && (
+        <>
+          <Box sx={{ width: "100%", height: "40px" }} />
+        </>
+      )}
+      <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
+        <Box ref={drag} sx={{ width: "100%" }}>
+          <Typography variant="body1">
+            {comment.rule != undefined && (
+              <>
+                <Link href={`/rulebook?num=${comment.rule.num}`}>
+                  <Button
+                    color="secondary"
+                    size="small"
+                    startIcon={<DescriptionOutlinedIcon />}
+                    sx={{ mr: 1, minWidth: 0 }}
+                  >
+                    {comment.rule.num}
+                  </Button>
+                </Link>
+                {comment.text}
+                <IconButton
+                  color="primary"
+                  size="small"
+                  sx={{ ml: 1, mr: 1 }}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    editButtonClick();
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+                <span>order: {comment.order}</span>
+              </>
+            )}
+          </Typography>
+        </Box>
+      </ListItemButton>
     </div>
   );
 };
