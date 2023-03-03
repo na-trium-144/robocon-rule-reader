@@ -26,7 +26,7 @@ export const CommentItem = (props: {
   comment: Comment;
   editButtonClick: () => void;
   onDrop: (target: Comment) => void;
-  setDraggingCid: (cid: number) => void;
+  setDraggingCid: () => void;
 }) => {
   const { isActive, comment, editButtonClick, onDrop, setDraggingCid } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -37,7 +37,7 @@ export const CommentItem = (props: {
   }));
   useEffect(() => {
     if(isDragging){
-      setDraggingCid(comment.id);
+      setDraggingCid();
     }
   }, [isDragging, setDraggingCid, comment]);
   const [{ isOver }, drop] = useDrop(

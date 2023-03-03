@@ -65,7 +65,9 @@ const CategoryView = (props: {
                   editButtonClick={() => {
                     setEditingCid(m.id);
                   }}
-                  setDraggingCid={setDraggingCid}
+                  setDraggingCid={() => {
+                    setDraggingCid(m.id);
+                  }}
                   onDrop={() => {
                     console.error(draggingCid);
                     // setDraggingCid((draggingCid) => {
