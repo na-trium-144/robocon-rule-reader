@@ -29,9 +29,18 @@ const CategoryView = (props: {
   setActiveCid: (cid: number) => void;
   editingCid: number;
   setEditingCid: (cid: number) => void;
+  checkedCids: number[];
+  setCheckedCids: (cids: number[]) => void;
 }) => {
-  const { category, activeCid, setActiveCid, editingCid, setEditingCid } =
-    props;
+  const {
+    category,
+    activeCid,
+    setActiveCid,
+    editingCid,
+    setEditingCid,
+    checkedCids,
+    setCheckedCids,
+  } = props;
   const { editComment, fetchAll, setCommentOrder } = useApi();
   const [commentsSorted, setCommentsSorted] = useState<Comment[]>([]);
   useEffect(() => {
@@ -71,7 +80,8 @@ const CategoryView = (props: {
     //   return null;
     // });
   }, [draggingCid, droppedCid, commentsSorted]);
-  return (
+  return (<>
+    <Typography variant="h6">{category.name}</Typography>
     <List sx={{ width: "100%" }}>
       {commentsSorted.map((m, i) => (
         <div key={m.id}>
@@ -104,17 +114,28 @@ const CategoryView = (props: {
               dropped={() => {
                 setDroppedCid(m.id);
               }}
+              checked={checkedCids.indexOf(m.id) >= 0}
+              setChecked={(checked: bool) => {
+                if(checked && checkedCids.indexOf(m.id) === -1){
+                  setCheckedCids(checkedCids.concat([m.id]));
+                }
+                if(!checked){
+                  setCheckedCids(checkedCids.filter((cid) => (cid !== m.id)));
+                }
+              }}
             />
           )}
         </div>
       ))}
     </List>
+    </>
   );
 };
 export default function Home() {
   const { query } = useRouter();
   const [activeCid, setActiveCid] = useState<number | null>(null);
   const [editingCid, setEditingCid] = useState<number | null>(null);
+  const [checkedCids, setCheckedCids] = useState<number[]>([]);
   const { categories, editComment, fetchAll, setCommentOrder } = useApi();
   useEffect(() => {
     if (typeof query.cid === "string") {
@@ -132,21 +153,23 @@ export default function Home() {
     >
       <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
-      <Typography variant="body1">ドラッグ&ドロップでコメントを並べ替えできます。</Typography>
+      <Typography variant="body1">
+        ドラッグ&ドロップでコメントを並べ替えできます。
+      </Typography>
       <DndProvider backend={HTML5Backend}>
         {categories
           .sort((a, b) => collator.compare(a.name, b.name))
           .map((g, i) => (
-            <div key={g.name}>
-              <Typography variant="h6">{g.name}</Typography>
               <CategoryView
+                key={g.name}
                 category={g}
                 activeCid={activeCid}
                 setActiveCid={setActiveCid}
                 editingCid={editingCid}
                 setEditingCid={setEditingCid}
+                checkedCids={checkedCids}
+                setCheckedCids={setCheckedCids}
               />
-            </div>
           ))}
       </DndProvider>
     </Container>

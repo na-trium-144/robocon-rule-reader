@@ -6,6 +6,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
 import Popper from "@mui/material/Popper";
 import Fade from "@mui/material/Fade";
@@ -27,8 +29,18 @@ export const CommentItem = (props: {
   editButtonClick: () => void;
   startDragging: () => void;
   dropped: () => void;
+  checked: bool;
+  setChecked: (checked: bool) => void;
 }) => {
-  const { isActive, comment, editButtonClick, startDragging, dropped } = props;
+  const {
+    isActive,
+    comment,
+    editButtonClick,
+    startDragging,
+    dropped,
+    checked,
+    setChecked,
+  } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: comment.category.name,
     collect: (monitor) => ({
@@ -61,7 +73,15 @@ export const CommentItem = (props: {
       )}
       <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
         <Box ref={drag} sx={{ width: "100%" }}>
-          <Typography variant="body1">
+          <Checkbox
+            edge="start"
+            checked={checked}
+            disableRipple
+            onClick={() => {
+              setChecked(!checked);
+            }}
+          />
+          <Typography variant="body1" component="span">
             {comment.rule != undefined && (
               <>
                 <Link href={`/rulebook?num=${comment.rule.num}`}>
