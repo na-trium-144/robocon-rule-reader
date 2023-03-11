@@ -9,6 +9,7 @@ interface ApiContextI {
   editRule: (rule: Rule) => Promise<boolean>;
   editComment: (comment: Comment) => Promise<boolean>;
   addComment: (comment: Comment) => Promise<boolean>;
+  deleteComment: (comment: Comment) => Promise<boolean>;
   setCommentOrder: (comment: Comment) => Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
@@ -65,6 +66,16 @@ export function ApiProvider(props: { children: any }) {
     setApiResult(retMsg);
     return retMsg.ok;
   };
+  const deleteComment = async (comment: Comment) => {
+    const res = await fetch("/api/delete_comment", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(comment),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
   const addComment = async (comment: Comment) => {
     const res = await fetch("/api/add_comment", {
       method: "post",
@@ -96,6 +107,7 @@ export function ApiProvider(props: { children: any }) {
         addRule,
         editRule,
         editComment,
+        deleteComment,
         addComment,
         setCommentOrder,
         apiResult,

@@ -31,6 +31,7 @@ export const CommentItem = (props: {
   dropped: () => void;
   checked: bool;
   setChecked: (checked: bool) => void;
+  isEditingMode: boolean;
 }) => {
   const {
     isActive,
@@ -40,6 +41,7 @@ export const CommentItem = (props: {
     dropped,
     checked,
     setChecked,
+    isEditingMode,
   } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: comment.category.name,
@@ -73,14 +75,16 @@ export const CommentItem = (props: {
       )}
       <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
         <Box ref={drag} sx={{ width: "100%" }}>
-          <Checkbox
-            edge="start"
-            checked={checked}
-            disableRipple
-            onClick={() => {
-              setChecked(!checked);
-            }}
-          />
+          {isEditingMode && (
+            <Checkbox
+              edge="start"
+              checked={checked}
+              disableRipple
+              onClick={() => {
+                setChecked(!checked);
+              }}
+            />
+          )}
           <Typography variant="body1" component="span">
             {comment.rule != undefined && (
               <>
@@ -95,17 +99,19 @@ export const CommentItem = (props: {
                   </Button>
                 </Link>
                 {comment.text}
-                <IconButton
-                  color="primary"
-                  size="small"
-                  sx={{ ml: 1, mr: 1 }}
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    editButtonClick();
-                  }}
-                >
-                  <EditIcon />
-                </IconButton>
+                {!isEditingMode && (
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    sx={{ ml: 1, mr: 1 }}
+                    onClick={(event: React.MouseEvent) => {
+                      event.stopPropagation();
+                      editButtonClick();
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
               </>
             )}
           </Typography>

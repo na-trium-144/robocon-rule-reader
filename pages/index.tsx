@@ -11,6 +11,9 @@ import Typography from "@mui/material/Typography";
 import Popper from "@mui/material/Popper";
 import Fade from "@mui/material/Fade";
 import Paper from "@mui/material/Paper";
+import ToggleButton from "@mui/material/ToggleButton";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import Link from "next/link";
 import AutoScroller from "components/scroller";
 import { useRouter } from "next/router";
@@ -31,6 +34,7 @@ const CategoryView = (props: {
   setEditingCid: (cid: number) => void;
   checkedCids: number[];
   setCheckedCids: (cids: number[]) => void;
+  isEditingMode: boolean;
 }) => {
   const {
     category,
@@ -40,6 +44,7 @@ const CategoryView = (props: {
     setEditingCid,
     checkedCids,
     setCheckedCids,
+    isEditingMode,
   } = props;
   const { editComment, fetchAll, setCommentOrder } = useApi();
   const [commentsSorted, setCommentsSorted] = useState<Comment[]>([]);
@@ -80,54 +85,92 @@ const CategoryView = (props: {
     //   return null;
     // });
   }, [draggingCid, droppedCid, commentsSorted]);
-  return (<>
-    <Typography variant="h6">{category.name}</Typography>
-    <List sx={{ width: "100%" }}>
-      {commentsSorted.map((m, i) => (
-        <div key={m.id}>
-          <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-          {editingCid === m.id ? (
-            <CommentItemEditing
-              isActive={activeCid === m.id}
-              comment={{ ...m, category: category }}
-              editComment={(comment: Comment) => {
-                void (async () => {
-                  const ok = await editComment(comment);
-                  if (ok) {
-                    setEditingCid(null);
-                    fetchAll();
+  return (
+    <>
+      <div>
+        {isEditingMode ? (
+          <Button
+            variant="text"
+            sx={{ minWidth: 0 }}
+            onClick={() => {
+              if (
+                category.comments.findIndex(
+                  (m) => checkedCids.indexOf(m.id) >= 0
+                ) >= 0
+              ) {
+                // ぜんぶチェック外す
+                setCheckedCids(
+                  checkedCids.filter(
+                    (cid) =>
+                      category.comments.findIndex((m) => cid === m.id) === -1
+                  )
+                );
+              } else {
+                // ぜんぶチェック外してからぜんぶつける
+                setCheckedCids(
+                  checkedCids
+                    .filter(
+                      (cid) =>
+                        category.comments.findIndex((m) => cid === m.id) === -1
+                    )
+                    .concat(category.comments.map((m) => m.id))
+                );
+              }
+            }}
+          >
+            <Typography variant="h6">{category.name}</Typography>
+          </Button>
+        ) : (
+          <Typography variant="h6">{category.name}</Typography>
+        )}
+      </div>
+      <List sx={{ width: "100%" }}>
+        {commentsSorted.map((m, i) => (
+          <div key={m.id}>
+            <ScrollElement id={m.id.toString()} name={m.id.toString()} />
+            {editingCid === m.id ? (
+              <CommentItemEditing
+                isActive={activeCid === m.id}
+                comment={{ ...m, category: category }}
+                editComment={(comment: Comment) => {
+                  void (async () => {
+                    const ok = await editComment(comment);
+                    if (ok) {
+                      setEditingCid(null);
+                      fetchAll();
+                    }
+                  })();
+                }}
+              />
+            ) : (
+              <CommentItem
+                isActive={activeCid === m.id}
+                comment={{ ...m, category: category }}
+                editButtonClick={() => {
+                  setEditingCid(m.id);
+                }}
+                startDragging={() => {
+                  setDraggingCid(m.id);
+                  setDroppedCid(null);
+                }}
+                dropped={() => {
+                  setDroppedCid(m.id);
+                }}
+                checked={checkedCids.indexOf(m.id) >= 0}
+                setChecked={(checked: bool) => {
+                  if (checked && checkedCids.indexOf(m.id) === -1) {
+                    setCheckedCids(checkedCids.concat([m.id]));
                   }
-                })();
-              }}
-            />
-          ) : (
-            <CommentItem
-              isActive={activeCid === m.id}
-              comment={{ ...m, category: category }}
-              editButtonClick={() => {
-                setEditingCid(m.id);
-              }}
-              startDragging={() => {
-                setDraggingCid(m.id);
-                setDroppedCid(null);
-              }}
-              dropped={() => {
-                setDroppedCid(m.id);
-              }}
-              checked={checkedCids.indexOf(m.id) >= 0}
-              setChecked={(checked: bool) => {
-                if(checked && checkedCids.indexOf(m.id) === -1){
-                  setCheckedCids(checkedCids.concat([m.id]));
-                }
-                if(!checked){
-                  setCheckedCids(checkedCids.filter((cid) => (cid !== m.id)));
-                }
-              }}
-            />
-          )}
-        </div>
-      ))}
-    </List>
+                  if (!checked) {
+                    setCheckedCids(checkedCids.filter((cid) => cid !== m.id));
+                  }
+                }}
+                isEditingMode={isEditingMode}
+              />
+            )}
+          </div>
+        ))}
+      </List>
     </>
   );
 };
@@ -136,7 +179,9 @@ export default function Home() {
   const [activeCid, setActiveCid] = useState<number | null>(null);
   const [editingCid, setEditingCid] = useState<number | null>(null);
   const [checkedCids, setCheckedCids] = useState<number[]>([]);
-  const { categories, editComment, fetchAll, setCommentOrder } = useApi();
+  const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
+  const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
+    useApi();
   useEffect(() => {
     if (typeof query.cid === "string") {
       setActiveCid(parseInt(query.cid));
@@ -156,20 +201,56 @@ export default function Home() {
       <Typography variant="body1">
         ドラッグ&ドロップでコメントを並べ替えできます。
       </Typography>
+      <ButtonGroup variant={isEditingMode ? "contained" : "outlined"}>
+        <Button
+          onClick={() => {
+            setIsEditingMode(!isEditingMode);
+            setCheckedCids([]);
+          }}
+        >
+          コメントを選択...
+        </Button>
+        {isEditingMode && (
+          <>
+            <Button>別のタグに移動</Button>
+            <Button
+              onClick={() => {
+                const allComments = categories.reduce(
+                  (prev, cat) => prev.concat(cat.comments),
+                  []
+                );
+                for (const cid of checkedCids) {
+                  const c = allComments.find((c) => c.id === cid);
+                  void (async () => {
+                    const ok = await deleteComment(c);
+                    if (ok) {
+                      setIsEditingMode(false);
+                      fetchAll();
+                    }
+                  })();
+                }
+              }}
+            >
+              コメントを削除
+            </Button>
+          </>
+        )}
+      </ButtonGroup>
       <DndProvider backend={HTML5Backend}>
         {categories
           .sort((a, b) => collator.compare(a.name, b.name))
           .map((g, i) => (
-              <CategoryView
-                key={g.name}
-                category={g}
-                activeCid={activeCid}
-                setActiveCid={setActiveCid}
-                editingCid={editingCid}
-                setEditingCid={setEditingCid}
-                checkedCids={checkedCids}
-                setCheckedCids={setCheckedCids}
-              />
+            <CategoryView
+              key={g.name}
+              category={g}
+              activeCid={activeCid}
+              setActiveCid={setActiveCid}
+              editingCid={editingCid}
+              setEditingCid={setEditingCid}
+              checkedCids={checkedCids}
+              setCheckedCids={setCheckedCids}
+              isEditingMode={isEditingMode}
+            />
           ))}
       </DndProvider>
     </Container>
