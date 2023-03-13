@@ -28,4 +28,5 @@ model Comment {
   ruleId  Int
   category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId Int?
+  order Float @default(0)
 }
