@@ -53,7 +53,7 @@ const CategoryView = (props: {
     setCommentsSorted(
       category.comments.sort((a, b) =>
         a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-      )
+      ) as Comment[]
     );
   }, [category]);
   const [draggingCid, setDraggingCid] = useState<number | null>(null);

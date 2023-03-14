@@ -3,12 +3,12 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Comment, ApiReturnMsg } from "lib/types";
 
-export const deleteComment = async (c: Comment[]) => {
+export const deleteComment = async (c: Comment) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   await prisma.comment
     .delete({
-      where:{
-        id:c.id
+      where: {
+        id: c.id,
       },
     })
     .catch((err) => {

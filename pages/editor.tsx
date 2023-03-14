@@ -72,6 +72,7 @@ export default function RuleEditor() {
           category: { id: 0, name: categoryCurrent },
           categoryId: 0,
           ruleId: 0,
+          order: 0,
         });
       } else {
         // skip

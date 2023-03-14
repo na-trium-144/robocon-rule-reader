@@ -29,8 +29,8 @@ export const CommentItem = (props: {
   editButtonClick: () => void;
   startDragging: () => void;
   dropped: () => void;
-  checked: bool;
-  setChecked: (checked: bool) => void;
+  checked: boolean;
+  setChecked: (checked: boolean) => void;
   isEditingMode: boolean;
 }) => {
   const {

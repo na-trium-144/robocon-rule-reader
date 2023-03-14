@@ -24,19 +24,16 @@ export const addComment = async (c: Comment) => {
           },
         },
         order: newOrder,
-        category:
-          c.category == null
-            ? undefined
-            : {
-                connectOrCreate: {
-                  where: {
-                    name: c.category.name,
-                  },
-                  create: {
-                    name: c.category.name,
-                  },
-                },
-              },
+        category: {
+          connectOrCreate: {
+            where: {
+              name: c.category.name,
+            },
+            create: {
+              name: c.category.name,
+            },
+          },
+        },
       },
     })
     .catch((err) => {
