@@ -29,10 +29,10 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 const CategoryView = (props: {
   category: Category;
-  activeCid: number;
-  setActiveCid: (cid: number) => void;
-  editingCid: number;
-  setEditingCid: (cid: number) => void;
+  activeCid: number | null;
+  setActiveCid: (cid: number | null) => void;
+  editingCid: number | null;
+  setEditingCid: (cid: number | null) => void;
   checkedCids: number[];
   setCheckedCids: (cids: number[]) => void;
   isEditingMode: boolean;
@@ -60,6 +60,9 @@ const CategoryView = (props: {
   const [droppedCid, setDroppedCid] = useState<number | null>(null);
   useEffect(() => {
     if (draggingCid != null && droppedCid != null) {
+      const draggingComment = commentsSorted.find(
+        (m) => m.id === draggingCid
+      ) as Comment;
       const droppedCommentIdx = commentsSorted.findIndex(
         (m) => m.id === droppedCid
       );
@@ -73,7 +76,7 @@ const CategoryView = (props: {
           newOrder = (previousComment.order + droppedComment.order) / 2;
         }
         const ok = await setCommentOrder({
-          id: draggingCid,
+          ...draggingComment,
           order: newOrder,
         });
         if (ok) {
@@ -158,7 +161,7 @@ const CategoryView = (props: {
                   setDroppedCid(m.id);
                 }}
                 checked={checkedCids.indexOf(m.id) >= 0}
-                setChecked={(checked: bool) => {
+                setChecked={(checked: boolean) => {
                   if (checked && checkedCids.indexOf(m.id) === -1) {
                     setCheckedCids(checkedCids.concat([m.id]));
                   }
@@ -208,7 +211,7 @@ export default function Home() {
         setEditingCid(null);
       }}
     >
-      <AutoScroller id={activeCid} />
+      <AutoScroller id={activeCid == null ? null : activeCid.toString()} />
       <Typography variant="h5">ルール概要、コメント</Typography>
       <Typography variant="body1">
         新規ルール・コメントの追加は「インポート」ページから、<br />
@@ -236,11 +239,11 @@ export default function Home() {
             <Button
               onClick={() => {
                 const allComments = categories.reduce(
-                  (prev, cat) => prev.concat(cat.comments),
-                  []
+                  (prev, cat) => prev.concat(cat.comments as Comment[]),
+                  [] as Comment[]
                 );
                 for (const cid of checkedCids) {
-                  const c = allComments.find((c) => c.id === cid);
+                  const c = allComments.find((c) => c.id === cid) as Comment;
                   void (async () => {
                     const ok = await deleteComment(c);
                     if (ok) {
@@ -274,15 +277,15 @@ export default function Home() {
             <Button
               onClick={() => {
                 const allComments = categories.reduce(
-                  (prev, cat) => prev.concat(cat.comments),
-                  []
+                  (prev, cat) => prev.concat(cat.comments as Comment[]),
+                  [] as Comment[]
                 );
                 for (const cid of checkedCids) {
                   const c = allComments.find((c) => c.id === cid) as Comment;
                   void (async () => {
                     const ok = await editComment({
                       ...c,
-                      category: { name: categoryMovingName, id: 0, comments: [] },
+                      category: { name: categoryMovingName, id: 0 },
                     });
                     if (ok) {
                       setIsEditingMode(false);
