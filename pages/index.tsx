@@ -211,8 +211,11 @@ export default function Home() {
       <AutoScroller id={activeCid} />
       <Typography variant="h5">ルール概要、コメント</Typography>
       <Typography variant="body1">
+        新規ルール・コメントの追加は「インポート」ページから、<br />
+        既存ルールへのコメントの追加は「原文」ページからできます。<br />
         ドラッグ&ドロップでコメントを並べ替えできます。
       </Typography>
+      <div>
       <ButtonGroup variant={isEditingMode ? "contained" : "outlined"}>
         <Button
           onClick={() => {
@@ -253,12 +256,14 @@ export default function Home() {
           </>
         )}
       </ButtonGroup>
+      </div>
       {isCategoryMovingMode && (
         <Grid container spacing={1} alignItems="center">
           <Grid item>
             <TextField
               variant="standard"
-              label="移動先のカテゴリ名"
+              size="small"
+              placeholder="移動先のカテゴリ名"
               value={categoryMovingName}
               onChange={(e) => {
                 setCategoryMovingName(e.target.value);
@@ -286,7 +291,7 @@ export default function Home() {
                   })();
                 }
               }}
-              variant="contained"
+              variant="text"
             >
               移動
             </Button>
