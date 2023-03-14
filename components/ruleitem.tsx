@@ -176,6 +176,7 @@ export const RuleItemActive = (props: {
                         rule: rule,
                         category: { id: 0, name: newCategory },
                         categoryId: 0,
+                        order: 0,
                       });
                     }}
                   >

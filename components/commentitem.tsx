@@ -6,6 +6,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Checkbox from "@mui/material/Checkbox";
 import Typography from "@mui/material/Typography";
 import Popper from "@mui/material/Popper";
 import Fade from "@mui/material/Fade";
@@ -19,44 +21,103 @@ import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Rule, Comment } from "lib/types";
+import { useDrag, useDrop } from "react-dnd";
 
 export const CommentItem = (props: {
   isActive: boolean;
   comment: Comment;
   editButtonClick: () => void;
+  startDragging: () => void;
+  dropped: () => void;
+  checked: boolean;
+  setChecked: (checked: boolean) => void;
+  isEditingMode: boolean;
 }) => {
-  const { isActive, comment, editButtonClick } = props;
+  const {
+    isActive,
+    comment,
+    editButtonClick,
+    startDragging,
+    dropped,
+    checked,
+    setChecked,
+    isEditingMode,
+  } = props;
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: comment.category.name,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
+  useEffect(() => {
+    if (isDragging) {
+      startDragging();
+    }
+  }, [isDragging, startDragging]);
+  const [{ isOver }, drop] = useDrop(
+    () => ({
+      accept: comment.category.name,
+      drop: dropped, // droppedが変化してもuseDropの中身は変更できないっぽい。
+      //なのでここで呼び出す関数はずっと変更されないものにする必要がある
+      collect: (monitor) => ({
+        isOver: !!monitor.isOver(),
+      }),
+    }),
+    []
+  );
+
   return (
-    <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
-      <Typography variant="body1">
-        {comment.rule != undefined && (
-          <>
-            <Link href={`/rulebook?num=${comment.rule.num}`}>
-              <Button
-                color="secondary"
-                size="small"
-                startIcon={<DescriptionOutlinedIcon />}
-                sx={{ mr: 1, minWidth: 0 }}
-              >
-                {comment.rule.num}
-              </Button>
-            </Link>
-            {comment.text}
-            <IconButton
-              color="primary"
-              size="small"
-              sx={{ ml: 1, mr: 1 }}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                editButtonClick();
+    <div ref={drop}>
+      {isOver && (
+        <>
+          <Box sx={{ width: "100%", height: "40px" }} />
+        </>
+      )}
+      <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
+        <Box ref={drag} sx={{ width: "100%" }}>
+          {isEditingMode && (
+            <Checkbox
+              edge="start"
+              checked={checked}
+              disableRipple
+              onClick={() => {
+                setChecked(!checked);
               }}
-            >
-              <EditIcon />
-            </IconButton>
-          </>
-        )}
-      </Typography>
-    </ListItemButton>
+            />
+          )}
+          <Typography variant="body1" component="span">
+            {comment.rule != undefined && (
+              <>
+                <Link href={`/rulebook?num=${comment.rule.num}`}>
+                  <Button
+                    color="secondary"
+                    size="small"
+                    startIcon={<DescriptionOutlinedIcon />}
+                    sx={{ mr: 1, minWidth: 0 }}
+                  >
+                    {comment.rule.num}
+                  </Button>
+                </Link>
+                {comment.text}
+                {!isEditingMode && (
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    sx={{ ml: 1, mr: 1 }}
+                    onClick={(event: React.MouseEvent) => {
+                      event.stopPropagation();
+                      editButtonClick();
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
+              </>
+            )}
+          </Typography>
+        </Box>
+      </ListItemButton>
+    </div>
   );
 };
 
