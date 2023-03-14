@@ -14,6 +14,7 @@ import Paper from "@mui/material/Paper";
 import ToggleButton from "@mui/material/ToggleButton";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
+import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import AutoScroller from "components/scroller";
 import { useRouter } from "next/router";
@@ -180,6 +181,17 @@ export default function Home() {
   const [editingCid, setEditingCid] = useState<number | null>(null);
   const [checkedCids, setCheckedCids] = useState<number[]>([]);
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
+  const [isCategoryMovingMode, setIsCategoryMovingMode] = useState<boolean>(false);
+  const [categoryMovingName, setCategoryMovingName] = useState<string>("");
+  useEffect(() => {
+    if (!isEditingMode) {
+      setCheckedCids([]);
+      setIsCategoryMovingMode(false);
+    }
+    if (!isCategoryMovingMode) {
+      setCategoryMovingName("");
+    }
+  }, [isEditingMode, isCategoryMovingMode]);
   const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
     useApi();
   useEffect(() => {
@@ -205,14 +217,19 @@ export default function Home() {
         <Button
           onClick={() => {
             setIsEditingMode(!isEditingMode);
-            setCheckedCids([]);
           }}
         >
           コメントを選択...
         </Button>
         {isEditingMode && (
           <>
-            <Button>別のタグに移動</Button>
+            <Button
+              onClick={() => {
+                setIsCategoryMovingMode(!isCategoryMovingMode);
+              }}
+            >
+              別のカテゴリに移動
+            </Button>
             <Button
               onClick={() => {
                 const allComments = categories.reduce(
@@ -236,6 +253,46 @@ export default function Home() {
           </>
         )}
       </ButtonGroup>
+      {isCategoryMovingMode && (
+        <Grid container spacing={1} alignItems="center">
+          <Grid item>
+            <TextField
+              variant="standard"
+              label="移動先のカテゴリ名"
+              value={categoryMovingName}
+              onChange={(e) => {
+                setCategoryMovingName(e.target.value);
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <Button
+              onClick={() => {
+                const allComments = categories.reduce(
+                  (prev, cat) => prev.concat(cat.comments),
+                  []
+                );
+                for (const cid of checkedCids) {
+                  const c = allComments.find((c) => c.id === cid) as Comment;
+                  void (async () => {
+                    const ok = await editComment({
+                      ...c,
+                      category: { name: categoryMovingName, id: 0, comments: [] },
+                    });
+                    if (ok) {
+                      setIsEditingMode(false);
+                      fetchAll();
+                    }
+                  })();
+                }
+              }}
+              variant="contained"
+            >
+              移動
+            </Button>
+          </Grid>
+        </Grid>
+      )}
       <DndProvider backend={HTML5Backend}>
         {categories
           .sort((a, b) => collator.compare(a.name, b.name))
