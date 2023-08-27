@@ -104,6 +104,15 @@ export const RuleItemActive = (props: {
                 ))}
               </Box>
             </Grid>
+            <Grid item xs={12}>
+              <Box>
+                {rule.textTrans.split("\n").map((line, i) => (
+                  <Typography variant="body2" key={i}>
+                    {line}
+                  </Typography>
+                ))}
+              </Box>
+            </Grid>
           </Grid>
           <List
             subheader={
@@ -201,6 +210,9 @@ export const RuleItemActiveEditing = (props: {
   const { rule, cancelEditing, editRule, apiResult } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
+  const [ruleTextTrans, setRuleTextTrans] = useState<string>(
+    rule.textTrans.trim()
+  );
   return (
     <>
       <ListItem
@@ -227,7 +239,13 @@ export const RuleItemActiveEditing = (props: {
               <Button
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
-                  editRule({ id: rule.id, num: ruleNum, text: ruleText, comments:rule.comments });
+                  editRule({
+                    id: rule.id,
+                    num: ruleNum,
+                    text: ruleText,
+                    textTrans: ruleTextTrans,
+                    comments: rule.comments,
+                  });
                 }}
               >
                 保存
@@ -256,6 +274,21 @@ export const RuleItemActiveEditing = (props: {
                 }}
                 variant="standard"
                 fullWidth
+                label="原文"
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                multiline
+                value={ruleTextTrans}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setRuleTextTrans(event.target.value);
+                }}
+                variant="standard"
+                fullWidth
+                label="日本語訳"
+                size="small"
               />
             </Grid>
           </Grid>
