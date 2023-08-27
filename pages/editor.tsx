@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
 
-const highlighter = (code: string) => {
+export const highlighter = (code: string) => {
   const colorSelector = (l: string) => {
     if (l.startsWith("#")) {
       return "brown";

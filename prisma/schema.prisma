@@ -19,6 +19,7 @@ model Rule {
   id   Int    @id @default(autoincrement())
   num  String @unique
   text String
+  textTrans String @default("")
   comments Comment[]
 }
 model Comment {
