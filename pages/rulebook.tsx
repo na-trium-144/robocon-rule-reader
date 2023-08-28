@@ -158,7 +158,12 @@ export default function RuleBook() {
         }}
       >
         {rules.map((r, i) => (
-          <Link key={i} href={`/rulebook?num=${r.num}`} legacyBehavior>
+          <Link
+            key={i}
+            href={`/rulebook?num=${r.num}`}
+            legacyBehavior
+            scroll={false}
+          >
             <MenuItem
               onClick={() => {
                 setMenuAnchorEl(null);

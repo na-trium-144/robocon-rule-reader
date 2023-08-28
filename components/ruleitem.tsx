@@ -199,7 +199,7 @@ export const RuleItemActive = (props: {
             <Grid item xs={12} sm="auto">
               <Typography variant="h5">
                 {rule.num}
-                <Link href={`/rulebook?num=${rule.num}`}>
+                <Link href={`/rulebook?num=${rule.num}`} scroll={false}>
                   <IconButton
                     onClick={() => {
                       navigator?.clipboard
