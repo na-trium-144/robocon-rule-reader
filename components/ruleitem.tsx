@@ -26,6 +26,76 @@ export const RuleItem = (props: {
   onClick: (event: React.MouseEvent) => void;
 }) => {
   const { rule, onClick } = props;
+  const [ruleBoth, setRuleBoth] = useState<string[][]>([]);
+  useEffect(()=>{
+    const ruleSplit = rule.text.split("\n").filter((l) => l !== "");
+    const ruleTransSplit = rule.textTrans.split("\n").filter((l) => l !== "");
+    if(ruleTransSplit.length === 0){
+      setRuleBoth(ruleSplit.map((r) => [r]));
+    }else{
+    while(ruleSplit.length < ruleTransSplit.length){
+      ruleSplit.push("");
+    }while(ruleSplit.length > ruleTransSplit.length){
+      ruleTransSplit.push("");
+    }
+    setRuleBoth(ruleSplit.map((r, i) => [r, ruleTransSplit[i]]));
+  }
+  }, [rule]);
+  return (
+    <>
+      <ListItemButton dense key={rule.num} onClick={onClick}>
+        <Grid container
+          sx={{
+            width: "100%",
+          }}
+        >
+          <Grid item xs={12}>
+          <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+            {rule.num}
+          </Typography>
+          {rule.comments.length >= 1 && (
+            <Badge
+              badgeContent={rule.comments.length}
+              overlap="circular"
+              color="warning"
+              sx={{ mr: 1 }}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+            >
+              <ChatIcon color="action" />
+            </Badge>
+          )}
+          </Grid>
+        {ruleBoth.map((rb, i) => (
+          rb.length === 1 ? (
+            <Grid item xs={12} key={i}>
+              <Typography variant="body2">{rb[0]}</Typography>
+              </Grid>
+            ) : (
+            <Grid item xs={12} key={i}>
+              <Grid container alignItems="top" spacing={1}>
+              <Grid item xs={6}>
+              <Typography variant="body2">{rb[0]}</Typography>
+              </Grid>
+              <Grid item xs={6}>
+              <Typography variant="body2">{rb[1]}</Typography>
+              </Grid>
+              </Grid>
+            </Grid>)
+          ))}
+        </Grid>
+      </ListItemButton>
+    </>
+  );
+};
+
+export const RuleItemCompact = (props: {
+  rule: Rule;
+  onClick: (event: React.MouseEvent) => void;
+}) => {
+  const { rule, onClick } = props;
   return (
     <>
       <ListItemButton dense key={rule.num} onClick={onClick}>
