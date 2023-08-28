@@ -26,9 +26,11 @@ export default function RuleBook() {
   const [scrollRuleNum, setScrollRuleNum] = useState<string>("");
   useEffect(() => {
     if (typeof query.num === "string") {
-      setSelectedRuleNum(query.num);
-      setIsEditing(false);
-      setScrollRuleNum(query.num);
+      setTimeout(() => {
+        setSelectedRuleNum(query.num);
+        setIsEditing(false);
+        setScrollRuleNum(query.num);
+      }, 100);
     }
   }, [query]);
   const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
@@ -157,7 +159,7 @@ export default function RuleBook() {
                 setSelectedRuleNum(r.num);
                 setIsEditing(false);
                 setScrollRuleNum(r.num);
-              });
+              }, 100);
             }}
           >
             <Typography variant="body2" noWrap>

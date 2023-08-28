@@ -200,7 +200,9 @@ export default function Home() {
     useApi();
   useEffect(() => {
     if (typeof query.cid === "string") {
-      setActiveCid(parseInt(query.cid));
+      setTimeout(() => {
+        setActiveCid(parseInt(query.cid));
+      }, 100);
     }
   }, [query]);
 
