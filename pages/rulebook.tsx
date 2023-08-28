@@ -26,7 +26,8 @@ export default function RuleBook() {
       setScrollRuleNum(query.num);
     }
   }, [query]);
-  const { rules, editRule, fetchAll, apiResult, addComment } = useApi();
+  const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
+    useApi();
   const collator = new Intl.Collator([], { numeric: true });
   return (
     <Container
@@ -92,6 +93,16 @@ export default function RuleBook() {
                         fetchAll();
                       }
                     })();
+                  }}
+                  onDelete={() => {
+                    if (confirm("このルール文を削除しますか?")) {
+                      void (async () => {
+                        const ok = await deleteRule(rule);
+                        if (ok) {
+                          fetchAll();
+                        }
+                      })();
+                    }
                   }}
                 />
               )}

@@ -66,6 +66,7 @@ export const RuleItemActive = (props: {
   rule: Rule;
   editButtonClick: () => void;
   addComment: (comment: Comment) => void;
+  onDelete: () => void;
 }) => {
   const { rule, editButtonClick, addComment } = props;
   const [newCategory, setNewCategory] = useState<string>("");
@@ -84,7 +85,7 @@ export const RuleItemActive = (props: {
             <Grid item>
               <Typography variant="h5">{rule.num}</Typography>
             </Grid>
-            <Grid item>
+            <Grid item xs>
               <Button
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
@@ -93,6 +94,17 @@ export const RuleItemActive = (props: {
                 startIcon={<EditIcon />}
               >
                 ルールを編集
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  props.onDelete();
+                }}
+                color="error"
+              >
+                削除
               </Button>
             </Grid>
             <Grid item xs={12}>
@@ -210,7 +222,9 @@ export const RuleItemActiveEditing = (props: {
   const { rule, cancelEditing, editRule, apiResult } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
-  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(!!rule.textTrans.trim());
+  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(
+    !!rule.textTrans.trim()
+  );
   const [ruleTextTrans, setRuleTextTrans] = useState<string>(
     rule.textTrans.trim()
   );
