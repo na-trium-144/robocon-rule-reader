@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Editor from "react-simple-code-editor";
 import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
@@ -10,8 +11,8 @@ import { Rule, Comment } from "lib/types";
 import { highlighter } from "./editor";
 
 export default function RuleEditor() {
-  const [code, setCode] = useState("");
-  const [codeTrans, setCodeTrans] = useState("");
+  const [code, setCode] = useState<string>("");
+  const [codeTrans, setCodeTrans] = useState<string>("");
   const { rules, editRuleTrans, apiResult, fetchAll } = useApi();
 
   useEffect(() => {
@@ -49,6 +50,34 @@ export default function RuleEditor() {
         )
     );
   }, []);
+  useEffect(() => {
+    setCode((code) => {
+      let codeSplit = code.split("\n").filter((l) => l !== "");
+      const codeTransSplit = codeTrans.split("\n");
+      for (
+        let i = 0, j = 0;
+        i < codeSplit.length && j < codeTransSplit.length;
+        i++, j++
+      ) {
+        if (codeTransSplit[j].startsWith("#")) {
+          // codeよりcodeTransのほうが短い場合(なにもしない)
+          while (i < codeSplit.length && !codeSplit[i].startsWith("#")) {
+            i++;
+          }
+        } else {
+          // codeよりcodeTransのほうが長い場合 codeに空行を追加
+          if (i < codeSplit.length && codeSplit[i].startsWith("#")) {
+            codeSplit = codeSplit
+              .slice(0, i)
+              .concat([""])
+              .concat(codeSplit.slice(i));
+          }
+        }
+      }
+      return codeSplit.join("\n");
+    });
+  }, [codeTrans]);
+
   const ruleParse = async () => {
     let ruleCurrent: Rule = {
       id: -1,
@@ -108,10 +137,19 @@ export default function RuleEditor() {
           "# ルール番号 or FAQ番号\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n"
         )}
       </div>
-      <Grid container sx={{mt: 1}} spacing={2}>
+      <Grid container sx={{ mt: 1 }} spacing={2}>
         <Grid item xs={6}>
           <Typography variant="body2">原文</Typography>
-          <Paper elevation={3} sx={{ my: 2, width: "100%" }}>
+          <Box
+            sx={{
+              mt: 1,
+              mb: 2,
+              width: "100%",
+              background: "lightgray",
+              border: 1,
+              borderColor: "gray",
+            }}
+          >
             <Editor
               value={code}
               onValueChange={() => undefined}
@@ -122,11 +160,13 @@ export default function RuleEditor() {
                 fontFamily: "monospace",
               }}
             />
-          </Paper>
+          </Box>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="body2">和訳</Typography>
-          <Paper elevation={3} sx={{ my: 2, width: "100%" }}>
+          <Box
+            sx={{ mt: 1, mb: 2, width: "100%", border: 1, borderColor: "gray" }}
+          >
             <Editor
               value={codeTrans}
               onValueChange={(code) => setCodeTrans(code)}
@@ -137,7 +177,7 @@ export default function RuleEditor() {
                 fontFamily: "monospace",
               }}
             />
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
       <Button
