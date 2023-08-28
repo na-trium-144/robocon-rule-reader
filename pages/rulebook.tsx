@@ -25,13 +25,13 @@ export default function RuleBook() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [scrollRuleNum, setScrollRuleNum] = useState<string>("");
   useEffect(() => {
-    if (typeof query.num === "string") {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (typeof query.num === "string") {
         setSelectedRuleNum(query.num);
         setIsEditing(false);
         setScrollRuleNum(query.num);
-      }, 100);
-    }
+      }
+    }, 100);
   }, [query]);
   const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
     useApi();

@@ -199,11 +199,11 @@ export default function Home() {
   const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
     useApi();
   useEffect(() => {
-    if (typeof query.cid === "string") {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (typeof query.cid === "string") {
         setActiveCid(parseInt(query.cid));
-      }, 100);
-    }
+      }
+    }, 100);
   }, [query]);
 
   const collator = new Intl.Collator([], { numeric: true });
