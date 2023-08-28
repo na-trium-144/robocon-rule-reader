@@ -20,6 +20,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
+import { useMediaQuery } from "react-responsive";
 
 const ruleSplitBoth = (rule: string, ruleTrans: string) => {
   const ruleSplit = rule.split("\n").filter((l) => l !== "");
@@ -37,15 +38,20 @@ const ruleSplitBoth = (rule: string, ruleTrans: string) => {
   }
 };
 
-const RuleTextGrid = (props: { ruleBoth: string[][] }) => {
-  const { ruleBoth } = props;
+const RuleTextGrid = (props: {
+  ruleBoth: string[][];
+  showTransOnMobile: boolean;
+}) => {
+  const { ruleBoth, showTransOnMobile } = props;
+  const isPC = useMediaQuery({ minWidth: 640 });
+  const gridRow = isPC ? ruleBoth.length : ruleBoth.length * 2 + 1;
   return (
     <div
       style={{
         display: "grid",
         width: "100%",
         gridAutoFlow: "column",
-        gridTemplateRows: "auto ".repeat(ruleBoth.length),
+        gridTemplateRows: "auto ".repeat(gridRow),
         gridAutoColumns: "1fr",
         columnGap: "10px",
       }}
@@ -68,14 +74,16 @@ const RuleTextGrid = (props: { ruleBoth: string[][] }) => {
           </div>
         )
       )}
-      {ruleBoth.map(
-        (rb, i) =>
-          rb.length !== 1 && (
-            <div key={i} style={{ overflowWrap: "anywhere" }}>
-              {rb[1]}
-            </div>
-          )
-      )}
+      {!isPC && showTransOnMobile && <div style={{ height: "10px" }} />}
+      {(isPC || showTransOnMobile) &&
+        ruleBoth.map(
+          (rb, i) =>
+            rb.length !== 1 && (
+              <div key={i} style={{ overflowWrap: "anywhere" }}>
+                {rb[1]}
+              </div>
+            )
+        )}
     </div>
   );
 };
@@ -115,7 +123,7 @@ export const RuleItem = (props: {
           </Grid>
           <Grid item xs={12}>
             <Typography variant="body2">
-              <RuleTextGrid ruleBoth={ruleBoth} />
+              <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={false} />
             </Typography>
           </Grid>
         </Grid>
@@ -213,7 +221,7 @@ export const RuleItemActive = (props: {
             </Grid>
             <Grid item xs={12}>
               <Typography variant="body1">
-                <RuleTextGrid ruleBoth={ruleBoth} />
+                <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={true} />
               </Typography>
             </Grid>
           </Grid>
@@ -330,7 +338,7 @@ export const RuleItemActiveEditing = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item>
+            <Grid item xs={12} sm="auto">
               <TextField
                 label="Rule Number"
                 variant="outlined"

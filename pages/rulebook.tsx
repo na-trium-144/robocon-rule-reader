@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import Fab from "@mui/material/Fab";
 import AutoScroller from "components/scroller";
 import MenuIcon from "@mui/icons-material/Menu";
+import ListIcon from "@mui/icons-material/List";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useRouter } from "next/router";
@@ -115,7 +116,9 @@ export default function RuleBook() {
             </>
           ))}
       </List>
-      <div style={{ position: "fixed", right: "20px", bottom: "20px" }}>
+      <div
+        style={{ position: "fixed", right: "20px", bottom: "20px", zIndex: 10 }}
+      >
         <Fab
           color="primary"
           size="small"
@@ -123,7 +126,7 @@ export default function RuleBook() {
             setMenuAnchorEl(event.currentTarget);
           }}
         >
-          <MenuIcon />
+          <ListIcon />
         </Fab>
       </div>
       <Menu
