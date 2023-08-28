@@ -18,6 +18,7 @@ import {
   RuleItemActive,
   RuleItemActiveEditing,
 } from "components/ruleitem";
+import Link from "next/link";
 
 export default function RuleBook() {
   const { query } = useRouter();
@@ -29,7 +30,13 @@ export default function RuleBook() {
       if (typeof query.num === "string") {
         setSelectedRuleNum(query.num);
         setIsEditing(false);
-        setScrollRuleNum(query.num);
+        // 確実にスクロールさせるためにsetStateしなおす
+        setScrollRuleNum("");
+        setTimeout(() => {
+          if (typeof query.num === "string") {
+            setScrollRuleNum(query.num);
+          }
+        });
       }
     }, 100);
   }, [query]);
@@ -151,21 +158,17 @@ export default function RuleBook() {
         }}
       >
         {rules.map((r, i) => (
-          <MenuItem
-            key={i}
-            onClick={() => {
-              setMenuAnchorEl(null);
-              setTimeout(() => {
-                setSelectedRuleNum(r.num);
-                setIsEditing(false);
-                setScrollRuleNum(r.num);
-              }, 100);
-            }}
-          >
-            <Typography variant="body2" noWrap>
-              {r.num}
-            </Typography>
-          </MenuItem>
+          <Link key={i} href={`/rulebook?num=${r.num}`} legacyBehavior>
+            <MenuItem
+              onClick={() => {
+                setMenuAnchorEl(null);
+              }}
+            >
+              <Typography variant="body2" noWrap>
+                {r.num}
+              </Typography>
+            </MenuItem>
+          </Link>
         ))}
       </Menu>
     </Container>
