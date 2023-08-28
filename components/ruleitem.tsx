@@ -21,70 +21,87 @@ import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
 
+const ruleSplitBoth = (rule: string, ruleTrans: string) => {
+  const ruleSplit = rule.split("\n").filter((l) => l !== "");
+  const ruleTransSplit = ruleTrans.split("\n").filter((l) => l !== "");
+  if (ruleTransSplit.length === 0) {
+    return ruleSplit.map((r) => [r]);
+  } else {
+    while (ruleSplit.length < ruleTransSplit.length) {
+      ruleSplit.push("");
+    }
+    while (ruleSplit.length > ruleTransSplit.length) {
+      ruleTransSplit.push("");
+    }
+    return ruleSplit.map((r, i) => [r, ruleTransSplit[i]]);
+  }
+};
+
+const RuleTextGrid = (props: { ruleBoth: string[][] }) => {
+  const { ruleBoth } = props;
+  return (
+    <div
+      style={{
+        display: "grid",
+        width: "100%",
+        gridAutoFlow: "column",
+        gridTemplateRows: "auto ".repeat(ruleBoth.length),
+        gridAutoColumns: "1fr 1fr",
+        columnGap: "10px",
+      }}
+    >
+      {ruleBoth.map((rb, i) =>
+        rb.length === 1 ? (
+          <div key={i} style={{ gridColumnStart: 1, gridColumnEnd: 3 }}>
+            {rb[0]}
+          </div>
+        ) : (
+          <div key={i}>{rb[0]}</div>
+        )
+      )}
+      {ruleBoth.map((rb, i) => rb.length !== 1 && <div key={i}>{rb[1]}</div>)}
+    </div>
+  );
+};
 export const RuleItem = (props: {
   rule: Rule;
   onClick: (event: React.MouseEvent) => void;
 }) => {
   const { rule, onClick } = props;
-  const [ruleBoth, setRuleBoth] = useState<string[][]>([]);
-  useEffect(()=>{
-    const ruleSplit = rule.text.split("\n").filter((l) => l !== "");
-    const ruleTransSplit = rule.textTrans.split("\n").filter((l) => l !== "");
-    if(ruleTransSplit.length === 0){
-      setRuleBoth(ruleSplit.map((r) => [r]));
-    }else{
-    while(ruleSplit.length < ruleTransSplit.length){
-      ruleSplit.push("");
-    }while(ruleSplit.length > ruleTransSplit.length){
-      ruleTransSplit.push("");
-    }
-    setRuleBoth(ruleSplit.map((r, i) => [r, ruleTransSplit[i]]));
-  }
-  }, [rule]);
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
   return (
     <>
       <ListItemButton dense key={rule.num} onClick={onClick}>
-        <Grid container
+        <Grid
+          container
           sx={{
             width: "100%",
           }}
         >
           <Grid item xs={12}>
-          <Typography variant="body1" component="span" sx={{ mr: 1 }}>
-            {rule.num}
-          </Typography>
-          {rule.comments.length >= 1 && (
-            <Badge
-              badgeContent={rule.comments.length}
-              overlap="circular"
-              color="warning"
-              sx={{ mr: 1 }}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-            >
-              <ChatIcon color="action" />
-            </Badge>
-          )}
+            <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+              {rule.num}
+            </Typography>
+            {rule.comments.length >= 1 && (
+              <Badge
+                badgeContent={rule.comments.length}
+                overlap="circular"
+                color="warning"
+                sx={{ mr: 1 }}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+              >
+                <ChatIcon color="action" />
+              </Badge>
+            )}
           </Grid>
-        {ruleBoth.map((rb, i) => (
-          rb.length === 1 ? (
-            <Grid item xs={12} key={i}>
-              <Typography variant="body2">{rb[0]}</Typography>
-              </Grid>
-            ) : (
-            <Grid item xs={12} key={i}>
-              <Grid container alignItems="top" spacing={1}>
-              <Grid item xs={6}>
-              <Typography variant="body2">{rb[0]}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-              <Typography variant="body2">{rb[1]}</Typography>
-              </Grid>
-              </Grid>
-            </Grid>)
-          ))}
+          <Grid item xs={12}>
+            <Typography variant="body2">
+              <RuleTextGrid ruleBoth={ruleBoth} />
+            </Typography>
+          </Grid>
         </Grid>
       </ListItemButton>
     </>
@@ -141,6 +158,7 @@ export const RuleItemActive = (props: {
   const { rule, editButtonClick, addComment } = props;
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
   return (
     <>
       <ListItem
@@ -178,22 +196,9 @@ export const RuleItemActive = (props: {
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <Box>
-                {rule.text.split("\n").map((line, i) => (
-                  <Typography variant="body1" key={i}>
-                    {line}
-                  </Typography>
-                ))}
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box>
-                {rule.textTrans.split("\n").map((line, i) => (
-                  <Typography variant="body2" key={i}>
-                    {line}
-                  </Typography>
-                ))}
-              </Box>
+              <Typography variant="body1">
+                <RuleTextGrid ruleBoth={ruleBoth} />
+              </Typography>
             </Grid>
           </Grid>
           <List
