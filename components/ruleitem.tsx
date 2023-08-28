@@ -210,6 +210,7 @@ export const RuleItemActiveEditing = (props: {
   const { rule, cancelEditing, editRule, apiResult } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
+  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(!!rule.textTrans.trim());
   const [ruleTextTrans, setRuleTextTrans] = useState<string>(
     rule.textTrans.trim()
   );
@@ -278,19 +279,21 @@ export const RuleItemActiveEditing = (props: {
                 size="small"
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                value={ruleTextTrans}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setRuleTextTrans(event.target.value);
-                }}
-                variant="standard"
-                fullWidth
-                label="日本語訳"
-                size="small"
-              />
-            </Grid>
+            {ruleHasTrans && (
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  value={ruleTextTrans}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setRuleTextTrans(event.target.value);
+                  }}
+                  variant="standard"
+                  fullWidth
+                  label="日本語訳"
+                  size="small"
+                />
+              </Grid>
+            )}
           </Grid>
         </Paper>
       </ListItem>
