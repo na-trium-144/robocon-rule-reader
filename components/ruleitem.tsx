@@ -7,6 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItemText from "@mui/material/ListItemText";
+import LinkIcon from "@mui/icons-material/Link";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -20,8 +21,119 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
+import { useMediaQuery } from "react-responsive";
 
+const ruleSplitBoth = (rule: string, ruleTrans: string) => {
+  const ruleSplit = rule.split("\n").filter((l) => l !== "");
+  const ruleTransSplit = ruleTrans.split("\n").filter((l) => l !== "");
+  if (ruleTransSplit.length === 0) {
+    return ruleSplit.map((r) => [r]);
+  } else {
+    while (ruleSplit.length < ruleTransSplit.length) {
+      ruleSplit.push("");
+    }
+    while (ruleSplit.length > ruleTransSplit.length) {
+      ruleTransSplit.push("");
+    }
+    return ruleSplit.map((r, i) => [r, ruleTransSplit[i]]);
+  }
+};
+
+const RuleTextGrid = (props: {
+  ruleBoth: string[][];
+  showTransOnMobile: boolean;
+}) => {
+  const { ruleBoth, showTransOnMobile } = props;
+  const isPC = useMediaQuery({ minWidth: 640 });
+  const gridRow = isPC ? ruleBoth.length : ruleBoth.length * 2 + 1;
+  return (
+    <div
+      style={{
+        display: "grid",
+        width: "100%",
+        gridAutoFlow: "column",
+        gridTemplateRows: "auto ".repeat(gridRow),
+        gridAutoColumns: "1fr",
+        columnGap: "10px",
+      }}
+    >
+      {ruleBoth.map((rb, i) =>
+        rb.length === 1 ? (
+          <div
+            key={i}
+            style={{
+              gridColumnStart: 1,
+              gridColumnEnd: 3,
+              overflowWrap: "anywhere",
+            }}
+          >
+            {rb[0]}
+          </div>
+        ) : (
+          <div key={i} style={{ overflowWrap: "anywhere" }}>
+            {rb[0]}
+          </div>
+        )
+      )}
+      {!isPC && showTransOnMobile && <div style={{ height: "10px" }} />}
+      {(isPC || showTransOnMobile) &&
+        ruleBoth.map(
+          (rb, i) =>
+            rb.length !== 1 && (
+              <div key={i} style={{ overflowWrap: "anywhere" }}>
+                {rb[1]}
+              </div>
+            )
+        )}
+    </div>
+  );
+};
 export const RuleItem = (props: {
+  rule: Rule;
+  onClick: (event: React.MouseEvent) => void;
+}) => {
+  const { rule, onClick } = props;
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  return (
+    <>
+      <ListItemButton dense key={rule.num} onClick={onClick}>
+        <Grid
+          container
+          sx={{
+            width: "100%",
+          }}
+        >
+          <Grid item xs={12}>
+            <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+              {rule.num}
+            </Typography>
+            {rule.comments.length >= 1 && (
+              <Badge
+                badgeContent={rule.comments.length}
+                overlap="circular"
+                color="warning"
+                sx={{ mr: 1 }}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+              >
+                <ChatIcon color="action" />
+              </Badge>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body2">
+              <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={false} />
+            </Typography>
+          </Grid>
+        </Grid>
+      </ListItemButton>
+    </>
+  );
+};
+
+export const RuleItemCompact = (props: {
   rule: Rule;
   onClick: (event: React.MouseEvent) => void;
 }) => {
@@ -71,6 +183,8 @@ export const RuleItemActive = (props: {
   const { rule, editButtonClick, addComment } = props;
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const [copied, setCopied] = useState<boolean>(false);
   return (
     <>
       <ListItem
@@ -82,8 +196,31 @@ export const RuleItemActive = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item>
-              <Typography variant="h5">{rule.num}</Typography>
+            <Grid item xs={12} sm="auto">
+              <Typography variant="h5">
+                {rule.num}
+                <Link href={`/rulebook?num=${rule.num}`} scroll={false}>
+                  <IconButton
+                    onClick={() => {
+                      navigator?.clipboard
+                        ?.writeText(
+                          `${window.location.origin}/rulebook?num=${rule.num}`
+                        )
+                        .then(() => {
+                          setCopied(true);
+                        })
+                        .catch(() => undefined);
+                    }}
+                  >
+                    <LinkIcon />
+                  </IconButton>
+                </Link>
+                {copied && (
+                  <Typography variant="caption">
+                    リンクをコピーしました！
+                  </Typography>
+                )}
+              </Typography>
             </Grid>
             <Grid item xs>
               <Button
@@ -108,22 +245,9 @@ export const RuleItemActive = (props: {
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <Box>
-                {rule.text.split("\n").map((line, i) => (
-                  <Typography variant="body1" key={i}>
-                    {line}
-                  </Typography>
-                ))}
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box>
-                {rule.textTrans.split("\n").map((line, i) => (
-                  <Typography variant="body2" key={i}>
-                    {line}
-                  </Typography>
-                ))}
-              </Box>
+              <Typography variant="body1">
+                <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={true} />
+              </Typography>
             </Grid>
           </Grid>
           <List
@@ -239,7 +363,7 @@ export const RuleItemActiveEditing = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item>
+            <Grid item xs={12} sm="auto">
               <TextField
                 label="Rule Number"
                 variant="outlined"

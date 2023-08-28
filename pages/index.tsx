@@ -184,7 +184,8 @@ export default function Home() {
   const [editingCid, setEditingCid] = useState<number | null>(null);
   const [checkedCids, setCheckedCids] = useState<number[]>([]);
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
-  const [isCategoryMovingMode, setIsCategoryMovingMode] = useState<boolean>(false);
+  const [isCategoryMovingMode, setIsCategoryMovingMode] =
+    useState<boolean>(false);
   const [categoryMovingName, setCategoryMovingName] = useState<string>("");
   useEffect(() => {
     if (!isEditingMode) {
@@ -198,9 +199,11 @@ export default function Home() {
   const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
     useApi();
   useEffect(() => {
-    if (typeof query.cid === "string") {
-      setActiveCid(parseInt(query.cid));
-    }
+    setTimeout(() => {
+      if (typeof query.cid === "string") {
+        setActiveCid(parseInt(query.cid));
+      }
+    }, 100);
   }, [query]);
 
   const collator = new Intl.Collator([], { numeric: true });
@@ -214,51 +217,55 @@ export default function Home() {
       <AutoScroller id={activeCid == null ? null : activeCid.toString()} />
       <Typography variant="h5">ルール概要、コメント</Typography>
       <Typography variant="body1">
-        新規ルール・コメントの追加は「インポート」ページから、<br />
-        既存ルールへのコメントの追加は「原文」ページからできます。<br />
+        新規ルール・コメントの追加は「インポート」ページから、
+        <br />
+        既存ルールへのコメントの追加は「原文」ページからできます。
+        <br />
         ドラッグ&ドロップでコメントを並べ替えできます。
       </Typography>
       <div>
-      <ButtonGroup variant={isEditingMode ? "contained" : "outlined"}>
-        <Button
-          onClick={() => {
-            setIsEditingMode(!isEditingMode);
-          }}
-        >
-          コメントを選択...
-        </Button>
-        {isEditingMode && (
-          <>
-            <Button
-              onClick={() => {
-                setIsCategoryMovingMode(!isCategoryMovingMode);
-              }}
-            >
-              別のカテゴリに移動
-            </Button>
-            <Button
-              onClick={() => {
-                const allComments = categories.reduce(
-                  (prev, cat) => prev.concat(cat.comments as Comment[]),
-                  [] as Comment[]
-                );
-                for (const cid of checkedCids) {
-                  const c = allComments.find((c) => c.id === cid) as Comment;
-                  void (async () => {
-                    const ok = await deleteComment(c);
-                    if (ok) {
-                      setIsEditingMode(false);
-                      fetchAll();
-                    }
-                  })();
-                }
-              }}
-            >
-              コメントを削除
-            </Button>
-          </>
-        )}
-      </ButtonGroup>
+        <ButtonGroup variant={isEditingMode ? "contained" : "outlined"}>
+          <Button
+            onClick={() => {
+              setIsEditingMode(!isEditingMode);
+            }}
+          >
+            コメントを移動/削除...
+          </Button>
+          {isEditingMode && (
+            <>
+              <Button
+                onClick={() => {
+                  setIsCategoryMovingMode(!isCategoryMovingMode);
+                }}
+                disabled={checkedCids.length === 0}
+              >
+                別のカテゴリに移動
+              </Button>
+              <Button
+                onClick={() => {
+                  const allComments = categories.reduce(
+                    (prev, cat) => prev.concat(cat.comments as Comment[]),
+                    [] as Comment[]
+                  );
+                  for (const cid of checkedCids) {
+                    const c = allComments.find((c) => c.id === cid) as Comment;
+                    void (async () => {
+                      const ok = await deleteComment(c);
+                      if (ok) {
+                        setIsEditingMode(false);
+                        fetchAll();
+                      }
+                    })();
+                  }
+                }}
+                disabled={checkedCids.length === 0}
+              >
+                コメントを削除
+              </Button>
+            </>
+          )}
+        </ButtonGroup>
       </div>
       {isCategoryMovingMode && (
         <Grid container spacing={1} alignItems="center">
@@ -304,6 +311,7 @@ export default function Home() {
       <DndProvider backend={HTML5Backend}>
         {categories
           .sort((a, b) => collator.compare(a.name, b.name))
+          .filter((c) => c.comments.length > 0)
           .map((g, i) => (
             <CategoryView
               key={g.name}

@@ -25,6 +25,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
+    "react-responsive": "^9.0.2",
     "react-scroll": "^1.8.9",
     "react-simple-code-editor": "^0.13.1"
   },
