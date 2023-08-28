@@ -41,6 +41,7 @@ export default function RuleEditor() {
       id: -1,
       num: "",
       text: "",
+      textTrans: "",
       comments: [],
     };
     let categoryCurrent = "";
@@ -59,6 +60,7 @@ export default function RuleEditor() {
           id: 0,
           num: "",
           text: "",
+          textTrans: "",
           comments: [],
         };
         ruleCurrent.num = l.slice(1).trim();
