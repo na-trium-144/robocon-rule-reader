@@ -7,6 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItemText from "@mui/material/ListItemText";
+import LinkIcon from "@mui/icons-material/Link";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -183,6 +184,7 @@ export const RuleItemActive = (props: {
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
   const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const [copied, setCopied] = useState<boolean>(false);
   return (
     <>
       <ListItem
@@ -194,8 +196,31 @@ export const RuleItemActive = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item>
-              <Typography variant="h5">{rule.num}</Typography>
+            <Grid item xs={12} sm="auto">
+              <Typography variant="h5">
+                {rule.num}
+                <Link href={`/rulebook?num=${rule.num}`}>
+                  <IconButton
+                    onClick={() => {
+                      navigator?.clipboard
+                        ?.writeText(
+                          `${window.location.origin}/rulebook?num=${rule.num}`
+                        )
+                        .then(() => {
+                          setCopied(true);
+                        })
+                        .catch(() => undefined);
+                    }}
+                  >
+                    <LinkIcon />
+                  </IconButton>
+                </Link>
+                {copied && (
+                  <Typography variant="caption">
+                    リンクをコピーしました！
+                  </Typography>
+                )}
+              </Typography>
             </Grid>
             <Grid item xs>
               <Button
