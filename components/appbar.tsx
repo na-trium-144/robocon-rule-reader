@@ -17,6 +17,7 @@ const pages = [
   { name: "概要", href: "/" },
   { name: "原文", href: "/rulebook" },
   { name: "インポート", href: "/editor" },
+  { name: "和訳", href: "/trans" },
   { name: "エクスポート", href: "/export" },
 ];
 const title = "Rule-Reader";

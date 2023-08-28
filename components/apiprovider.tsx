@@ -7,6 +7,8 @@ interface ApiContextI {
   categories: Category[];
   addRule: (rule: Rule) => Promise<boolean>;
   editRule: (rule: Rule) => Promise<boolean>;
+  deleteRule: (rule: Rule) => Promise<boolean>;
+  editRuleTrans: (rule: Rule) => Promise<boolean>;
   editComment: (comment: Comment) => Promise<boolean>;
   addComment: (comment: Comment) => Promise<boolean>;
   deleteComment: (comment: Comment) => Promise<boolean>;
@@ -48,6 +50,26 @@ export function ApiProvider(props: { children: any }) {
   };
   const editRule = async (rule: Rule) => {
     const res = await fetch("/api/edit_rule", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rule),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
+  const deleteRule = async (rule: Rule) => {
+    const res = await fetch("/api/delete_rule", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rule),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
+  const editRuleTrans = async (rule: Rule) => {
+    const res = await fetch("/api/edit_rule_trans", {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rule),
@@ -106,6 +128,8 @@ export function ApiProvider(props: { children: any }) {
         categories,
         addRule,
         editRule,
+        deleteRule,
+        editRuleTrans,
         editComment,
         deleteComment,
         addComment,

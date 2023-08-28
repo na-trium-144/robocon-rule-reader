@@ -3,11 +3,12 @@ import Editor from "react-simple-code-editor";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
 
-const highlighter = (code: string) => {
+export const highlighter = (code: string) => {
   const colorSelector = (l: string) => {
     if (l.startsWith("#")) {
       return "brown";
@@ -40,6 +41,7 @@ export default function RuleEditor() {
       id: -1,
       num: "",
       text: "",
+      textTrans: "",
       comments: [],
     };
     let categoryCurrent = "";
@@ -58,6 +60,7 @@ export default function RuleEditor() {
           id: 0,
           num: "",
           text: "",
+          textTrans: "",
           comments: [],
         };
         ruleCurrent.num = l.slice(1).trim();
@@ -104,7 +107,7 @@ export default function RuleEditor() {
           "# ルール番号 or FAQ番号\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n@ カテゴリー\n- 要約・コメント\n- 要約・コメント\n"
         )}
       </div>
-      <Paper elevation={3} sx={{ my: 2, width: "100%" }}>
+      <Box sx={{ my: 2, width: "100%", border: 1, borderColor: "gray" }}>
         <Editor
           value={code}
           onValueChange={(code) => setCode(code)}
@@ -115,7 +118,7 @@ export default function RuleEditor() {
             fontFamily: "monospace",
           }}
         />
-      </Paper>
+      </Box>
       <Button
         variant="contained"
         onClick={() => {

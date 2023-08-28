@@ -66,6 +66,7 @@ export const RuleItemActive = (props: {
   rule: Rule;
   editButtonClick: () => void;
   addComment: (comment: Comment) => void;
+  onDelete: () => void;
 }) => {
   const { rule, editButtonClick, addComment } = props;
   const [newCategory, setNewCategory] = useState<string>("");
@@ -84,7 +85,7 @@ export const RuleItemActive = (props: {
             <Grid item>
               <Typography variant="h5">{rule.num}</Typography>
             </Grid>
-            <Grid item>
+            <Grid item xs>
               <Button
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
@@ -95,10 +96,30 @@ export const RuleItemActive = (props: {
                 ルールを編集
               </Button>
             </Grid>
+            <Grid item>
+              <Button
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  props.onDelete();
+                }}
+                color="error"
+              >
+                削除
+              </Button>
+            </Grid>
             <Grid item xs={12}>
               <Box>
                 {rule.text.split("\n").map((line, i) => (
                   <Typography variant="body1" key={i}>
+                    {line}
+                  </Typography>
+                ))}
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box>
+                {rule.textTrans.split("\n").map((line, i) => (
+                  <Typography variant="body2" key={i}>
                     {line}
                   </Typography>
                 ))}
@@ -201,6 +222,12 @@ export const RuleItemActiveEditing = (props: {
   const { rule, cancelEditing, editRule, apiResult } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
+  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(
+    !!rule.textTrans.trim()
+  );
+  const [ruleTextTrans, setRuleTextTrans] = useState<string>(
+    rule.textTrans.trim()
+  );
   return (
     <>
       <ListItem
@@ -227,7 +254,13 @@ export const RuleItemActiveEditing = (props: {
               <Button
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
-                  editRule({ id: rule.id, num: ruleNum, text: ruleText, comments:rule.comments });
+                  editRule({
+                    id: rule.id,
+                    num: ruleNum,
+                    text: ruleText,
+                    textTrans: ruleTextTrans,
+                    comments: rule.comments,
+                  });
                 }}
               >
                 保存
@@ -256,8 +289,25 @@ export const RuleItemActiveEditing = (props: {
                 }}
                 variant="standard"
                 fullWidth
+                label="原文"
+                size="small"
               />
             </Grid>
+            {ruleHasTrans && (
+              <Grid item xs={12}>
+                <TextField
+                  multiline
+                  value={ruleTextTrans}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setRuleTextTrans(event.target.value);
+                  }}
+                  variant="standard"
+                  fullWidth
+                  label="日本語訳"
+                  size="small"
+                />
+              </Grid>
+            )}
           </Grid>
         </Paper>
       </ListItem>
