@@ -3,7 +3,11 @@ import { useState, useEffect } from "react";
 import Container from "@mui/material/Container";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
+import Fab from "@mui/material/Fab";
 import AutoScroller from "components/scroller";
+import MenuIcon from "@mui/icons-material/Menu";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { useRouter } from "next/router";
 import { Element as ScrollElement } from "react-scroll";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
@@ -29,6 +33,8 @@ export default function RuleBook() {
   const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
     useApi();
   const collator = new Intl.Collator([], { numeric: true });
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+
   return (
     <Container
       sx={{ width: "100%", height: "100%" }}
@@ -109,6 +115,54 @@ export default function RuleBook() {
             </>
           ))}
       </List>
+      <div style={{ position: "fixed", right: "20px", bottom: "20px" }}>
+        <Fab
+          color="primary"
+          size="small"
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+            setMenuAnchorEl(event.currentTarget);
+          }}
+        >
+          <MenuIcon />
+        </Fab>
+      </div>
+      <Menu
+        open={!!menuAnchorEl}
+        anchorEl={menuAnchorEl}
+        onClose={() => setMenuAnchorEl(null)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        PaperProps={{
+          style: {
+            maxHeight: "50%",
+            width: "240px",
+          },
+        }}
+      >
+        {rules.map((r, i) => (
+          <MenuItem
+            key={i}
+            onClick={() => {
+              setMenuAnchorEl(null);
+              setTimeout(() => {
+                setSelectedRuleNum(r.num);
+                setIsEditing(false);
+                setScrollRuleNum(r.num);
+              });
+            }}
+          >
+            <Typography variant="body2" noWrap>
+              {r.num}
+            </Typography>
+          </MenuItem>
+        ))}
+      </Menu>
     </Container>
   );
 }

@@ -46,20 +46,36 @@ const RuleTextGrid = (props: { ruleBoth: string[][] }) => {
         width: "100%",
         gridAutoFlow: "column",
         gridTemplateRows: "auto ".repeat(ruleBoth.length),
-        gridAutoColumns: "1fr 1fr",
+        gridAutoColumns: "1fr",
         columnGap: "10px",
       }}
     >
       {ruleBoth.map((rb, i) =>
         rb.length === 1 ? (
-          <div key={i} style={{ gridColumnStart: 1, gridColumnEnd: 3 }}>
+          <div
+            key={i}
+            style={{
+              gridColumnStart: 1,
+              gridColumnEnd: 3,
+              overflowWrap: "anywhere",
+            }}
+          >
             {rb[0]}
           </div>
         ) : (
-          <div key={i}>{rb[0]}</div>
+          <div key={i} style={{ overflowWrap: "anywhere" }}>
+            {rb[0]}
+          </div>
         )
       )}
-      {ruleBoth.map((rb, i) => rb.length !== 1 && <div key={i}>{rb[1]}</div>)}
+      {ruleBoth.map(
+        (rb, i) =>
+          rb.length !== 1 && (
+            <div key={i} style={{ overflowWrap: "anywhere" }}>
+              {rb[1]}
+            </div>
+          )
+      )}
     </div>
   );
 };
