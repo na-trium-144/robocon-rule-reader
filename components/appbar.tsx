@@ -1,3 +1,4 @@
+import { useState } from "react";
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -12,6 +13,10 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import Link from "next/link";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
+import { useApi } from "components/apiprovider";
+import { useRouter } from "next/router";
 
 const pages = [
   { name: "概要", href: "/" },
@@ -22,10 +27,46 @@ const pages = [
 ];
 const title = "Rule-Reader";
 
+function BookSelect(props: { color?: string }) {
+  const { books, currentBook } = useApi();
+  const { pathname, query } = useRouter();
+  const router = useRouter();
+  // const [bookSelect, setBookSelect] = useState<string>("");
+  if (pathname === "/books") {
+    return null;
+  } else {
+    return (
+      <FormControl sx={{ minWidth: 120 }} size="small">
+        <Select
+          value={currentBook.name}
+          onChange={(event: SelectChangeEvent) => {
+            // setBookSelect(event.target.value);
+          }}
+          sx={{ color: props.color }}
+        >
+          {books.map((b, i) => (
+            <MenuItem
+              key={i}
+              value={b.name}
+              onClick={() => void router.push(pathname + "?book=" + b.name)}
+            >
+              {b.name}
+            </MenuItem>
+          ))}
+          <MenuItem value="" onClick={() => void router.push("/books")}>
+            ルールブックを管理...
+          </MenuItem>
+        </Select>
+      </FormControl>
+    );
+  }
+}
+
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
-  );
+  const { pathname, query } = useRouter();
+  const { books, currentBook } = useApi();
+
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -33,7 +74,6 @@ function ResponsiveAppBar() {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
-
   return (
     <>
       <AppBar position="fixed">
@@ -43,13 +83,15 @@ function ResponsiveAppBar() {
               variant="h5"
               noWrap
               sx={{
-                mr: 2,
+                mr: 1,
                 display: { xs: "none", md: "flex" },
               }}
             >
               {title}
             </Typography>
-
+            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+              <BookSelect color="white" />
+            </Box>
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
@@ -79,8 +121,13 @@ function ResponsiveAppBar() {
                   display: { xs: "block", md: "none" },
                 }}
               >
+                {pathname !== "/books" && (
+                  <MenuItem>
+                    <BookSelect />
+                  </MenuItem>
+                )}
                 {pages.map((page) => (
-                  <Link key={page.name} href={page.href} legacyBehavior>
+                  <Link key={page.name} href={page.href + "?book=" + currentBook.name} legacyBehavior>
                     <MenuItem onClick={handleCloseNavMenu}>
                       <Typography textAlign="center">{page.name}</Typography>
                     </MenuItem>
@@ -101,7 +148,7 @@ function ResponsiveAppBar() {
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {pages.map((page) => (
-                <Link href={page.href} key={page.name} legacyBehavior>
+                <Link href={page.href  + "?book=" + currentBook.name} key={page.name} legacyBehavior>
                   <Button
                     onClick={handleCloseNavMenu}
                     sx={{ color: "white", display: "block" }}

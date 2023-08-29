@@ -13,7 +13,7 @@ import { highlighter } from "./editor";
 export default function RuleEditor() {
   const [code, setCode] = useState<string>("");
   const [codeTrans, setCodeTrans] = useState<string>("");
-  const { rules, editRuleTrans, apiResult, fetchAll } = useApi();
+  const { currentBook, rules, editRuleTrans, apiResult, fetchAll } = useApi();
 
   useEffect(() => {
     const collator = new Intl.Collator([], { numeric: true });
@@ -122,7 +122,7 @@ export default function RuleEditor() {
   };
   return (
     <Container>
-      <Typography variant="h5">ルール和訳</Typography>
+      <Typography variant="h5">ルール和訳 ({currentBook.name})</Typography>
       <Typography variant="body1">
         右枠の日本語訳を編集してください。
       </Typography>

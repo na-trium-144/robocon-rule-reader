@@ -1,9 +1,12 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { Book, Rule, Comment, Category, ApiReturnMsg } from "lib/types";
+import { useRouter } from "next/router";
 
 interface ApiContextI {
   fetchAll: () => void;
   books: Book[];
+  currentBook: Book;
+  rules: Rule[];
   categories: Category[];
   addBook: (book: Book) => Promise<boolean>;
   editBook: (book: Book) => Promise<boolean>;
@@ -20,8 +23,25 @@ interface ApiContextI {
 const ApiContext = createContext<ApiContextI>(null as never);
 export const useApi = () => useContext(ApiContext);
 
+const emptyBook = () => ({
+  id: -1,
+  name: "",
+  rules: [],
+});
 export function ApiProvider(props: { children: any }) {
+  const { query } = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
+  const [currentBook, setCurrentBook] = useState<Book>(emptyBook());
+  useEffect(() => {
+    const qbook =
+      typeof query.book === "string"
+        ? query.book
+        : books.sort((a, b) => a.name > b.name)[0]?.name || "";
+    const book = books.find((b) => b.name === qbook);
+    if (book != undefined) {
+      setCurrentBook(book);
+    }
+  }, [books, query]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [apiResult, setApiResult] = useState<ApiReturnMsg>({
     status: 200,
@@ -68,6 +88,8 @@ export function ApiProvider(props: { children: any }) {
       value={{
         fetchAll,
         books,
+        currentBook,
+        rules: currentBook.rules,
         categories,
         addBook,
         editBook,

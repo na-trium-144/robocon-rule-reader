@@ -35,7 +35,7 @@ export const highlighter = (code: string) => {
 
 export default function RuleEditor() {
   const [code, setCode] = useState("");
-  const { addRule, apiResult, fetchAll } = useApi();
+  const { currentBook, addRule, apiResult, fetchAll } = useApi();
   const ruleParse = async () => {
     let ruleCurrent: Rule = {
       id: -1,
@@ -92,7 +92,9 @@ export default function RuleEditor() {
   };
   return (
     <Container>
-      <Typography variant="h5">ルールインポート</Typography>
+      <Typography variant="h5">
+        ルールインポート ({currentBook.name})
+      </Typography>
       <Typography variant="body1">
         以下にルールまたはFAQをコピペし、整形してください。
       </Typography>

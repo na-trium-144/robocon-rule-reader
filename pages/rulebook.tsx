@@ -30,8 +30,15 @@ export default function RuleBook() {
   const [scrollTo, setScrollTo] = useState<string>("");
   // AutoScrollerに渡す値(rulesの読み込みが完了したらセット)
   const [scrollRuleNum, setScrollRuleNum] = useState<string>("");
-  const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
-    useApi();
+  const {
+    currentBook,
+    rules,
+    editRule,
+    fetchAll,
+    apiResult,
+    addComment,
+    deleteRule,
+  } = useApi();
   const collator = new Intl.Collator([], { numeric: true });
 
   useEffect(() => {
@@ -67,7 +74,9 @@ export default function RuleBook() {
       }}
     >
       <AutoScroller id={scrollRuleNum} />
-      <Typography variant="h5">ルールブック原文</Typography>
+      <Typography variant="h5">
+        ルールブック原文 ({currentBook.name})
+      </Typography>
       <List sx={{ width: "100%" }}>
         {rules
           .sort((a, b) => collator.compare(a.num, b.num))

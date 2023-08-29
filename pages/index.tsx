@@ -205,8 +205,14 @@ export default function Home() {
       setCategoryMovingName("");
     }
   }, [isEditingMode, isCategoryMovingMode]);
-  const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
-    useApi();
+  const {
+    currentBook,
+    categories,
+    editComment,
+    fetchAll,
+    setCommentOrder,
+    deleteComment,
+  } = useApi();
 
   useEffect(() => {
     if (typeof query.cid === "string") {
@@ -229,7 +235,9 @@ export default function Home() {
       }}
     >
       <AutoScroller id={activeCid == null ? null : activeCid.toString()} />
-      <Typography variant="h5">ルール概要、コメント</Typography>
+      <Typography variant="h5">
+        ルール概要、コメント ({currentBook.name})
+      </Typography>
       <Typography variant="body1">
         新規ルール・コメントの追加は「インポート」ページから、
         <br />

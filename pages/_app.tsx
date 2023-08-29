@@ -9,8 +9,8 @@ const inter = Inter({ subsets: ["latin"] });
 export default function App(props: { Component: any; pageProps: any }) {
   return (
     <div className={inter.className}>
-      <AppBar />
       <ApiProvider>
+        <AppBar />
         <props.Component {...props.pageProps} />
       </ApiProvider>
     </div>
