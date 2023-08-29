@@ -178,14 +178,23 @@ const CategoryView = (props: {
     </>
   );
 };
+
 export default function Home() {
   const { query } = useRouter();
+  // スクロール先のコメント (query変化したらセット)
+  const [scrollTo, setScrollTo] = useState<number | null>(null);
+  // AutoScrollerに渡す値 (commentsの読み込み完了したらセット)
   const [activeCid, setActiveCid] = useState<number | null>(null);
+  // 編集中のコメント
   const [editingCid, setEditingCid] = useState<number | null>(null);
+  // 選択モードでチェックがついているコメント
   const [checkedCids, setCheckedCids] = useState<number[]>([]);
+  // 選択モードかどうか
   const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
+  // 別のカテゴリに移動のボックスを表示するかどうか
   const [isCategoryMovingMode, setIsCategoryMovingMode] =
     useState<boolean>(false);
+  // 移動先カテゴリ名
   const [categoryMovingName, setCategoryMovingName] = useState<string>("");
   useEffect(() => {
     if (!isEditingMode) {
@@ -198,13 +207,18 @@ export default function Home() {
   }, [isEditingMode, isCategoryMovingMode]);
   const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
     useApi();
+
   useEffect(() => {
-    setTimeout(() => {
-      if (typeof query.cid === "string") {
-        setActiveCid(parseInt(query.cid));
-      }
-    }, 100);
+    if (typeof query.cid === "string") {
+      setScrollTo(parseInt(query.cid));
+    }
   }, [query]);
+  useEffect(() => {
+    if (scrollTo != null && categories.length > 0) {
+      setActiveCid(scrollTo);
+      setScrollTo(null);
+    }
+  }, [scrollTo, categories]);
 
   const collator = new Intl.Collator([], { numeric: true });
   return (
