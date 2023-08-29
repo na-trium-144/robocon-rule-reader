@@ -22,27 +22,37 @@ import Link from "next/link";
 
 export default function RuleBook() {
   const { query } = useRouter();
+  // 選択中のルール
   const [selectedRuleNum, setSelectedRuleNum] = useState<string>("");
+  // 選択中のルールが編集画面かどうか
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  // スクロール先(query変化時にセット)
+  const [scrollTo, setScrollTo] = useState<string>("");
+  // AutoScrollerに渡す値(rulesの読み込みが完了したらセット)
   const [scrollRuleNum, setScrollRuleNum] = useState<string>("");
-  useEffect(() => {
-    setTimeout(() => {
-      if (typeof query.num === "string") {
-        setSelectedRuleNum(query.num);
-        setIsEditing(false);
-        // 確実にスクロールさせるためにsetStateしなおす
-        setScrollRuleNum("");
-        setTimeout(() => {
-          if (typeof query.num === "string") {
-            setScrollRuleNum(query.num);
-          }
-        });
-      }
-    }, 100);
-  }, [query]);
   const { rules, editRule, fetchAll, apiResult, addComment, deleteRule } =
     useApi();
   const collator = new Intl.Collator([], { numeric: true });
+
+  useEffect(() => {
+    if (typeof query.num === "string") {
+      setScrollTo(query.num);
+    }
+  }, [query]);
+  useEffect(() => {
+    if (scrollTo !== "" && rules.find((r) => r.num === scrollTo)) {
+      setSelectedRuleNum(scrollTo);
+      setIsEditing(false);
+      // 確実にスクロールさせるためにsetStateしなおす
+      setScrollRuleNum("");
+      setTimeout(() => {
+        setScrollRuleNum(scrollTo);
+      });
+      setScrollTo("");
+    }
+  }, [scrollTo, rules]);
+
+  // メニュー表示
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   return (
