@@ -22,6 +22,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useMediaQuery } from "react-responsive";
+import { useApi } from "components/apiprovider";
 
 const ruleSplitBoth = (rule: string, ruleTrans: string) => {
   const ruleSplit = rule.split("\n").filter((l) => l !== "");
@@ -107,6 +108,9 @@ export const RuleItem = (props: {
             <Typography variant="body1" component="span" sx={{ mr: 1 }}>
               {rule.num}
             </Typography>
+            <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+              {rule.title}
+            </Typography>
             {rule.comments.length >= 1 && (
               <Badge
                 badgeContent={rule.comments.length}
@@ -122,53 +126,12 @@ export const RuleItem = (props: {
               </Badge>
             )}
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ pl: 2 }}>
             <Typography variant="body2">
               <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={false} />
             </Typography>
           </Grid>
         </Grid>
-      </ListItemButton>
-    </>
-  );
-};
-
-export const RuleItemCompact = (props: {
-  rule: Rule;
-  onClick: (event: React.MouseEvent) => void;
-}) => {
-  const { rule, onClick } = props;
-  return (
-    <>
-      <ListItemButton dense key={rule.num} onClick={onClick}>
-        <Typography
-          variant="body1"
-          sx={{
-            textOverflow: "ellipsis",
-            width: "100%",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Typography variant="h6" component="span" sx={{ mr: 1 }}>
-            {rule.num}
-          </Typography>
-          {rule.comments.length >= 1 && (
-            <Badge
-              badgeContent={rule.comments.length}
-              overlap="circular"
-              color="warning"
-              sx={{ mr: 1 }}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-            >
-              <ChatIcon color="action" />
-            </Badge>
-          )}
-          {rule.text}
-        </Typography>
       </ListItemButton>
     </>
   );
@@ -185,6 +148,8 @@ export const RuleItemActive = (props: {
   const [newText, setNewText] = useState<string>("");
   const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
   const [copied, setCopied] = useState<boolean>(false);
+  const { currentBook } = useApi();
+
   return (
     <>
       <ListItem
@@ -198,13 +163,17 @@ export const RuleItemActive = (props: {
           <Grid container alignItems="center" spacing={1}>
             <Grid item xs={12} sm="auto">
               <Typography variant="h5">
-                {rule.num}
-                <Link href={`/rulebook?num=${rule.num}`} scroll={false}>
+                <span style={{ paddingRight: 12 }}>{rule.num}</span>
+                {rule.title}
+                <Link
+                  href={`/rulebook?book=${currentBook.name}&num=${rule.num}`}
+                  scroll={false}
+                >
                   <IconButton
                     onClick={() => {
                       navigator?.clipboard
                         ?.writeText(
-                          `${window.location.origin}/rulebook?num=${rule.num}`
+                          `${window.location.origin}/rulebook?book=${currentBook.name}&num=${rule.num}`
                         )
                         .then(() => {
                           setCopied(true);
@@ -273,7 +242,7 @@ export const RuleItemActive = (props: {
                     />
                   </Grid>
                   <Grid item xs>
-                    <Link href={`/?cid=${c.id}`}>
+                    <Link href={`/?book=${currentBook.name}&cid=${c.id}`}>
                       <Typography variant="body2">{c.text}</Typography>
                     </Link>
                   </Grid>
@@ -345,6 +314,7 @@ export const RuleItemActiveEditing = (props: {
 }) => {
   const { rule, cancelEditing, editRule, apiResult } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
+  const [ruleTitle, setRuleTitle] = useState<string>(rule.title);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
   const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(
     !!rule.textTrans.trim()
@@ -363,7 +333,7 @@ export const RuleItemActiveEditing = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item xs={12} sm="auto">
+            <Grid item xs={12} sm={2} lg={1}>
               <TextField
                 label="Rule Number"
                 variant="outlined"
@@ -372,6 +342,19 @@ export const RuleItemActiveEditing = (props: {
                   setRuleNum(event.target.value);
                 }}
                 size="small"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm>
+              <TextField
+                label="Title"
+                variant="standard"
+                value={ruleTitle}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setRuleTitle(event.target.value);
+                }}
+                size="small"
+                fullWidth
               />
             </Grid>
             <Grid item>
@@ -381,6 +364,7 @@ export const RuleItemActiveEditing = (props: {
                   editRule({
                     id: rule.id,
                     num: ruleNum,
+                    title: ruleTitle,
                     text: ruleText,
                     textTrans: ruleTextTrans,
                     comments: rule.comments,

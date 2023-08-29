@@ -189,7 +189,7 @@ export default function RuleBook() {
               }}
             >
               <Typography variant="body2" noWrap>
-                {r.num}
+                {r.num} {r.title}
               </Typography>
             </MenuItem>
           </Link>
