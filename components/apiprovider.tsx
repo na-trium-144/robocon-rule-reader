@@ -1,14 +1,16 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { Rule, Comment, Category, ApiReturnMsg } from "lib/types";
+import { Book, Rule, Comment, Category, ApiReturnMsg } from "lib/types";
 
 interface ApiContextI {
   fetchAll: () => void;
-  rules: Rule[];
+  books: Book[];
   categories: Category[];
+  addBook: (book: Book) => Promise<boolean>;
+  editBook: (book: Book) => Promise<boolean>;
+  deleteBook: (book: Book) => Promise<boolean>;
   addRule: (rule: Rule) => Promise<boolean>;
   editRule: (rule: Rule) => Promise<boolean>;
   deleteRule: (rule: Rule) => Promise<boolean>;
-  editRuleTrans: (rule: Rule) => Promise<boolean>;
   editComment: (comment: Comment) => Promise<boolean>;
   addComment: (comment: Comment) => Promise<boolean>;
   deleteComment: (comment: Comment) => Promise<boolean>;
@@ -19,18 +21,28 @@ const ApiContext = createContext<ApiContextI>(null as never);
 export const useApi = () => useContext(ApiContext);
 
 export function ApiProvider(props: { children: any }) {
-  const [rules, setRules] = useState<Rule[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [apiResult, setApiResult] = useState<ApiReturnMsg>({
     status: 200,
     ok: false,
     msg: "",
   });
+  const api = async (pathName: string, data: any) => {
+    const res = await fetch("/api/" + pathName, {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const retMsg = (await res.json()) as ApiReturnMsg;
+    setApiResult(retMsg);
+    return retMsg.ok;
+  };
   const fetchAll = () => {
     void (async () => {
-      const res = await fetch("/api/fetch_rule");
-      const resData = (await res.json()) as Rule[];
-      setRules(resData);
+      const res = await fetch("/api/fetch_book");
+      const resData = (await res.json()) as Book[];
+      setBooks(resData);
     })();
     void (async () => {
       const res = await fetch("/api/fetch_category");
@@ -38,98 +50,31 @@ export function ApiProvider(props: { children: any }) {
       setCategories(resData);
     })();
   };
-  const addRule = async (rule: Rule) => {
-    const res = await fetch("/api/add_rule", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rule),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const editRule = async (rule: Rule) => {
-    const res = await fetch("/api/edit_rule", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rule),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const deleteRule = async (rule: Rule) => {
-    const res = await fetch("/api/delete_rule", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rule),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const editRuleTrans = async (rule: Rule) => {
-    const res = await fetch("/api/edit_rule_trans", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rule),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const editComment = async (comment: Comment) => {
-    const res = await fetch("/api/edit_comment", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(comment),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const deleteComment = async (comment: Comment) => {
-    const res = await fetch("/api/delete_comment", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(comment),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const addComment = async (comment: Comment) => {
-    const res = await fetch("/api/add_comment", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(comment),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
-  const setCommentOrder = async (comment: Comment) => {
-    const res = await fetch("/api/set_comment_order", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(comment),
-    });
-    const retMsg = (await res.json()) as ApiReturnMsg;
-    setApiResult(retMsg);
-    return retMsg.ok;
-  };
+  const addBook = (book: Book) => api("add_book", book);
+  const editBook = (book: Book) => api("edit_book", book);
+  const deleteBook = (book: Book) => api("delete_book", book);
+  const addRule = (rule: Rule) => api("add_rule", rule);
+  const editRule = (rule: Rule) => api("edit_rule", rule);
+  const deleteRule = (rule: Rule) => api("delete_rule", rule);
+  const addComment = (comment: Comment) => api("add_comment", comment);
+  const editComment = (comment: Comment) => api("edit_comment", comment);
+  const deleteComment = (comment: Comment) => api("delete_comment", comment);
+  const setCommentOrder = (comment: Comment) =>
+    api("set_comment_order", comment);
   useEffect(fetchAll, []);
 
   return (
     <ApiContext.Provider
       value={{
         fetchAll,
-        rules,
+        books,
         categories,
+        addBook,
+        editBook,
+        deleteBook,
         addRule,
         editRule,
         deleteRule,
-        editRuleTrans,
         editComment,
         deleteComment,
         addComment,

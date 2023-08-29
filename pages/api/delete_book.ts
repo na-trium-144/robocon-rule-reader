@@ -1,17 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Rule, ApiReturnMsg } from "lib/types";
+import { Book, ApiReturnMsg } from "lib/types";
 
-export const editRuleTrans = async (rule: Rule) => {
+export const deleteBook = async (book: Book) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
-  await prisma.rule
-    .update({
+  await prisma.book
+    .delete({
       where: {
-        num: rule.num,
-      },
-      data: {
-        textTrans: rule.textTrans || "",
+        id: book.id,
       },
     })
     .catch((err) => {
@@ -22,13 +19,13 @@ export const editRuleTrans = async (rule: Rule) => {
     });
   return ret;
 };
-export default function editRuleTransRouter(
+export default function deleteBookRouter(
   req: NextApiRequest,
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Rule;
-    const ret = await editRuleTrans(data);
+    const data = req.body as Book;
+    const ret = await deleteBook(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);
   })(req, res);

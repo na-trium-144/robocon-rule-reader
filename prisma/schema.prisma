@@ -10,6 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Book {
+  id Int @id @default(autoincrement())
+  name String @unique
+  rules Rule[]
+}
 model Category {
   id Int @id @default(autoincrement())
   name String @unique
@@ -17,10 +22,13 @@ model Category {
 }
 model Rule {
   id   Int    @id @default(autoincrement())
-  num  String @unique
+  num  String
+  title String
   text String
-  textTrans String @default("")
+  textTrans String
   comments Comment[]
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId Int
 }
 model Comment {
   id   Int    @id @default(autoincrement())

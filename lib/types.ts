@@ -1,5 +1,19 @@
 import { Prisma } from "@prisma/client";
 
+export const bookInclude = Prisma.validator<Prisma.BookInclude>()({
+  rules: {
+    include: {
+      comments: {
+        include:{
+          category: true,
+        }
+      }
+    },
+  },
+});
+const book = Prisma.validator<Prisma.BookArgs>()({ include: bookInclude });
+export type Book = Prisma.BookGetPayload<typeof book>;
+
 export const ruleInclude = Prisma.validator<Prisma.RuleInclude>()({
   comments: {
     include: {

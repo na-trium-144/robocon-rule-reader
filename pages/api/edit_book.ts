@@ -1,20 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Rule, ApiReturnMsg } from "lib/types";
+import { Book, ApiReturnMsg } from "lib/types";
 
-export const editRule = async (rule: Rule) => {
+export const editBook = async (book: Book) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
-  await prisma.rule
+  await prisma.book
     .update({
       where: {
-        id: rule.id,
+        id: book.id,
       },
       data: {
-        num: rule.num,
-        title: rule.title,
-        text: rule.text,
-        textTrans: rule.textTrans,
+        name: book.name,
       },
     })
     .catch((err) => {
@@ -24,7 +21,7 @@ export const editRule = async (rule: Rule) => {
       ) {
         ret.status = 400;
         ret.ok = false;
-        ret.msg = "ルール番号が重複しています";
+        ret.msg = "ルールブック名が重複しています";
       } else {
         ret.status = 500;
         ret.ok = false;
@@ -39,8 +36,8 @@ export default function editRuleRouter(
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Rule;
-    const ret = await editRule(data);
+    const data = req.body as Book;
+    const ret = await editBook(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);
   })(req, res);
