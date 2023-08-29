@@ -5,13 +5,18 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
 
 export const highlighter = (code: string) => {
   const colorSelector = (l: string) => {
-    if (l.startsWith("#")) {
+    if (l.startsWith("##")) {
+      return "green";
+    } else if (l.startsWith("#")) {
       return "brown";
+    } else if (l.startsWith(">>")) {
+      return "blue";
     } else if (l.startsWith(">")) {
       return "green";
     } else if (l.startsWith("@")) {
@@ -36,34 +41,38 @@ export const highlighter = (code: string) => {
 export default function RuleEditor() {
   const [code, setCode] = useState("");
   const { currentBook, addRule, apiResult, fetchAll } = useApi();
+  const emptyRule = () => ({
+    id: 0,
+    num: "",
+    title: "",
+    text: "",
+    textTrans: "",
+    comments: [],
+    bookId: currentBook.id,
+  });
+  const [loading, setLoading] = useState<boolean>(false);
   const ruleParse = async () => {
-    let ruleCurrent: Rule = {
-      id: -1,
-      num: "",
-      text: "",
-      textTrans: "",
-      comments: [],
-    };
+      setLoading(true);
+    let ruleCurrent: Rule = { ...emptyRule(), id: -1 };
     let categoryCurrent = "";
 
     for (let i = 0; i < code.split("\n").length; i++) {
       const l = code.split("\n")[i];
-      if (l.startsWith("#")) {
+      if (l.startsWith("##")) {
+        ruleCurrent.title = l.slice(2).trim();
+      } else if (l.startsWith("#")) {
         if (ruleCurrent.id != -1) {
           const ok = await addRule(ruleCurrent);
           if (!ok) {
+            setLoading(false)
             return;
           }
           setCode(code.split("\n").slice(i).join("\n"));
         }
-        ruleCurrent = {
-          id: 0,
-          num: "",
-          text: "",
-          textTrans: "",
-          comments: [],
-        };
+        ruleCurrent = emptyRule();
         ruleCurrent.num = l.slice(1).trim();
+      } else if (l.startsWith(">>")) {
+        ruleCurrent.textTrans += l.slice(2).trim() + "\n";
       } else if (l.startsWith(">")) {
         ruleCurrent.text += l.slice(1).trim() + "\n";
       } else if (l.startsWith("@")) {
@@ -84,11 +93,13 @@ export default function RuleEditor() {
     if (ruleCurrent.num !== "") {
       const ok = await addRule(ruleCurrent);
       if (!ok) {
+        setLoading(false)
         return;
       }
       setCode("");
     }
     fetchAll();
+      setLoading(false)
   };
   return (
     <Container>
@@ -106,7 +117,14 @@ export default function RuleEditor() {
         }}
       >
         {highlighter(
-          "# ルール番号 or FAQ番号\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n> ルール本文ルール本文ルール本文ルール本文ルール本文\n@ カテゴリー\n- 要約・コメント\n- 要約・コメント\n"
+          "# ルール番号 or FAQ番号\n" +
+            "## タイトル\n" +
+            "> ルール本文ルール本文ルール本文ルール本文ルール本文\n" +
+            "> ルール本文ルール本文ルール本文ルール本文ルール本文\n" +
+            // ">> 和訳和訳\n" +
+            "@ カテゴリー\n" +
+            "- 要約・コメント\n" +
+            "- 要約・コメント\n"
         )}
       </div>
       <Box sx={{ my: 2, width: "100%", border: 1, borderColor: "gray" }}>
@@ -121,14 +139,15 @@ export default function RuleEditor() {
           }}
         />
       </Box>
-      <Button
+      <LoadingButton
         variant="contained"
         onClick={() => {
           void ruleParse();
         }}
+        loading={loading}
       >
         インポート
-      </Button>
+      </LoadingButton>
       <span>{apiResult.msg}</span>
     </Container>
   );

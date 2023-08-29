@@ -12,6 +12,7 @@ export const addRule = async (rule: Rule) => {
         num: rule.num,
         title: rule.title,
         text: rule.text,
+        textTrans: rule.textTrans,
         book: {
           connect: {
             id: rule.bookId,
