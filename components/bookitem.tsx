@@ -61,7 +61,7 @@ export const BookItem = (props: {
               size="small"
               startIcon={<DescriptionOutlinedIcon fontSize="small" />}
             >
-              {/*book.rules.length*/}
+              {book.rulesNum}
             </Button>
           </Link>
           <Link href={`/?book=${book.name}`}>
@@ -71,7 +71,7 @@ export const BookItem = (props: {
               size="small"
               startIcon={<ChatOutlinedIcon fontSize="small" />}
             >
-              {/*book.rules.reduce((prev, r) => prev + r.comments.length, 0)*/}
+              {book.commentsNum}
             </Button>
           </Link>
         </Grid>

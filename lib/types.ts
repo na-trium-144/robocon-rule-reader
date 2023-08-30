@@ -13,6 +13,7 @@ export const bookInclude = Prisma.validator<Prisma.BookInclude>()({
 });
 const book = Prisma.validator<Prisma.BookArgs>()({ include: bookInclude });
 export type Book = Prisma.BookGetPayload<typeof book>;
+export type BookInfo = Book & { rulesNum: number; commentsNum: number };
 
 export const ruleInclude = Prisma.validator<Prisma.RuleInclude>()({
   comments: {

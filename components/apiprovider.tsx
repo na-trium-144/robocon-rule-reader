@@ -1,10 +1,17 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { Book, Rule, Comment, Category, ApiReturnMsg } from "lib/types";
+import {
+  Book,
+  BookInfo,
+  Rule,
+  Comment,
+  Category,
+  ApiReturnMsg,
+} from "lib/types";
 import { useRouter } from "next/router";
 
 interface ApiContextI {
   fetchAll: () => void;
-  books: Book[];
+  books: BookInfo[];
   currentBook: Book;
   rules: Rule[];
   categories: Category[];
@@ -30,7 +37,7 @@ const emptyBook = () => ({
 });
 export function ApiProvider(props: { children: any }) {
   const { query } = useRouter();
-  const [books, setBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<BookInfo[]>([]);
   const [currentBook, setCurrentBook] = useState<Book>(emptyBook());
   const [rules, setRules] = useState<Rule[]>([]);
   useEffect(() => {
@@ -66,7 +73,7 @@ export function ApiProvider(props: { children: any }) {
   const fetchAll = () => {
     void (async () => {
       const res = await fetch("/api/fetch_book");
-      const resData = (await res.json()) as Book[];
+      const resData = (await res.json()) as BookInfo[];
       setBooks(resData);
     })();
   };
