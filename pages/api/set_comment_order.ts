@@ -7,11 +7,11 @@ export const setCommentOrder = async (c: Comment) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   await prisma.comment
     .update({
-      where:{
-        id:c.id
+      where: {
+        id: c.id,
       },
       data: {
-        order: c.order
+        order: c.order,
       },
     })
     .catch((err) => {

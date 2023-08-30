@@ -52,6 +52,7 @@ export default function addRuleRouter(
           ...c,
           ruleId: (retRule as Rule).id,
           rule: retRule as Rule,
+          bookId: data.bookId,
         });
       }
     }

@@ -32,6 +32,7 @@ export function ApiProvider(props: { children: any }) {
   const { query } = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [currentBook, setCurrentBook] = useState<Book>(emptyBook());
+  const [rules, setRules] = useState<Rule[]>([]);
   useEffect(() => {
     const qbook =
       typeof query.book === "string"
@@ -48,6 +49,27 @@ export function ApiProvider(props: { children: any }) {
     ok: false,
     msg: "",
   });
+  useEffect(() => {
+    if (currentBook.name !== "") {
+      void (async () => {
+        const res = await fetch(`/api/fetch_rule?book=${currentBook.name}`);
+        const resData = (await res.json()) as Rule[];
+        setRules(resData);
+      })();
+      void (async () => {
+        const res = await fetch(`/api/fetch_category?book=${currentBook.name}`);
+        const resData = (await res.json()) as Category[];
+        setCategories(resData);
+      })();
+    }
+  }, [currentBook]);
+  const fetchAll = () => {
+    void (async () => {
+      const res = await fetch("/api/fetch_book");
+      const resData = (await res.json()) as Book[];
+      setBooks(resData);
+    })();
+  };
   const api = async (pathName: string, data: any) => {
     const res = await fetch("/api/" + pathName, {
       method: "post",
@@ -58,30 +80,21 @@ export function ApiProvider(props: { children: any }) {
     setApiResult(retMsg);
     return retMsg.ok;
   };
-  const fetchAll = () => {
-    void (async () => {
-      const res = await fetch("/api/fetch_book");
-      const resData = (await res.json()) as Book[];
-      setBooks(resData);
-    })();
-    void (async () => {
-      const res = await fetch("/api/fetch_category");
-      const resData = (await res.json()) as Category[];
-      setCategories(resData);
-    })();
-  };
   const addBook = (book: Book) => api("add_book", book);
   const editBook = (book: Book) => api("edit_book", book);
   const deleteBook = (book: Book) => api("delete_book", book);
   const addRule = (rule: Rule) => api("add_rule", rule);
   const editRule = (rule: Rule) => api("edit_rule", rule);
   const deleteRule = (rule: Rule) => api("delete_rule", rule);
-  const addComment = (comment: Comment) => api("add_comment", comment);
+  const addComment = (comment: Comment) =>
+    api("add_comment", { ...comment, bookId: currentBook.id });
   const editComment = (comment: Comment) => api("edit_comment", comment);
   const deleteComment = (comment: Comment) => api("delete_comment", comment);
   const setCommentOrder = (comment: Comment) =>
     api("set_comment_order", comment);
-  useEffect(fetchAll, []);
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   return (
     <ApiContext.Provider
@@ -89,7 +102,7 @@ export function ApiProvider(props: { children: any }) {
         fetchAll,
         books,
         currentBook,
-        rules: currentBook.rules,
+        rules,
         categories,
         addBook,
         editBook,

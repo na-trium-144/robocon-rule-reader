@@ -14,11 +14,14 @@ model Book {
   id Int @id @default(autoincrement())
   name String @unique
   rules Rule[]
+  categories Category[]
 }
 model Category {
   id Int @id @default(autoincrement())
-  name String @unique
+  name String
   comments Comment[]
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId Int
 }
 model Rule {
   id   Int    @id @default(autoincrement())

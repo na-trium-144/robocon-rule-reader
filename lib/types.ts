@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 export const bookInclude = Prisma.validator<Prisma.BookInclude>()({
-  rules: {
+  /*rules: {
     include: {
       comments: {
         include:{
@@ -9,7 +9,7 @@ export const bookInclude = Prisma.validator<Prisma.BookInclude>()({
         }
       }
     },
-  },
+  },*/
 });
 const book = Prisma.validator<Prisma.BookArgs>()({ include: bookInclude });
 export type Book = Prisma.BookGetPayload<typeof book>;
@@ -50,3 +50,5 @@ export interface ApiReturnMsg {
   ok: boolean;
   msg: string;
 }
+
+export type CommentCreate = Comment & { bookId: number };
