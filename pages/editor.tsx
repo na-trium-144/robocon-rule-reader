@@ -10,8 +10,12 @@ import { Rule, Comment } from "lib/types";
 
 export const highlighter = (code: string) => {
   const colorSelector = (l: string) => {
-    if (l.startsWith("#")) {
+    if (l.startsWith("##")) {
+      return "green";
+    } else if (l.startsWith("#")) {
       return "brown";
+    } else if (l.startsWith(">>")) {
+      return "blue";
     } else if (l.startsWith(">")) {
       return "green";
     } else if (l.startsWith("@")) {
@@ -64,6 +68,8 @@ export default function RuleEditor() {
           comments: [],
         };
         ruleCurrent.num = l.slice(1).trim();
+      } else if (l.startsWith(">>")) {
+        ruleCurrent.textTrans += l.slice(2).trim() + "\n";
       } else if (l.startsWith(">")) {
         ruleCurrent.text += l.slice(1).trim() + "\n";
       } else if (l.startsWith("@")) {

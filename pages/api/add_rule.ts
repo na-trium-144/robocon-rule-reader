@@ -11,6 +11,7 @@ export const addRule = async (rule: Rule) => {
         data: {
           num: rule.num,
           text: rule.text,
+          textTrans: rule.textTrans,
         },
       })
       .catch((err) => {
