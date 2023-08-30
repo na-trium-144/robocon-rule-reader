@@ -53,19 +53,27 @@ export const BookItem = (props: {
             <EditIcon />
           </IconButton>
         </Grid>
-        <Grid item sx={{ ml: 1.5 }}>
-          <DescriptionOutlinedIcon fontSize="small" />
-        </Grid>
         <Grid item>
-          <Typography variant="body2">{book.rules.length}</Typography>
-        </Grid>
-        <Grid item sx={{ ml: 1.5 }}>
-          <ChatOutlinedIcon fontSize="small" />
-        </Grid>
-        <Grid item>
-          <Typography variant="body2">
-            {book.rules.reduce((prev, r) => prev + r.comments.length, 0)}
-          </Typography>
+          <Link href={`/rulebook?book=${book.name}`}>
+            <Button
+              onClick={() => undefined}
+              color="secondary"
+              size="small"
+              startIcon={<DescriptionOutlinedIcon fontSize="small" />}
+            >
+              {book.rules.length}
+            </Button>
+          </Link>
+          <Link href={`/?book=${book.name}`}>
+            <Button
+              onClick={() => undefined}
+              color="secondary"
+              size="small"
+              startIcon={<ChatOutlinedIcon fontSize="small" />}
+            >
+              {book.rules.reduce((prev, r) => prev + r.comments.length, 0)}
+            </Button>
+          </Link>
         </Grid>
       </Grid>
     </ListItemButton>
