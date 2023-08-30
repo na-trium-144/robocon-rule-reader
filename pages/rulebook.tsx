@@ -39,6 +39,7 @@ export default function RuleBook() {
     addComment,
     deleteRule,
   } = useApi();
+  const [hasTrans, setHasTrans] = useState<boolean>(false);
   const collator = new Intl.Collator([], { numeric: true });
 
   useEffect(() => {
@@ -58,6 +59,9 @@ export default function RuleBook() {
       setScrollTo("");
     }
   }, [scrollTo, rules]);
+  useEffect(() => {
+    setHasTrans(rules.filter((r) => r.textTrans.trim() !== "").length > 0);
+  }, [rules]);
 
   // メニュー表示
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -87,6 +91,7 @@ export default function RuleBook() {
                 <RuleItem
                   key={i}
                   rule={rule}
+                  hasTrans={hasTrans}
                   onClick={(event: React.MouseEvent) => {
                     if (!isEditing) {
                       event.stopPropagation();
@@ -99,6 +104,7 @@ export default function RuleBook() {
                 <RuleItemActiveEditing
                   key={i}
                   rule={rule}
+                  hasTrans={hasTrans}
                   cancelEditing={() => {
                     setIsEditing(false);
                   }}
@@ -117,6 +123,7 @@ export default function RuleBook() {
                 <RuleItemActive
                   key={i}
                   rule={rule}
+                  hasTrans={hasTrans}
                   editButtonClick={() => {
                     setIsEditing(true);
                     apiResult.msg = "";

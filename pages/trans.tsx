@@ -6,6 +6,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
 import { highlighter } from "./editor";
@@ -13,7 +14,7 @@ import { highlighter } from "./editor";
 export default function RuleEditor() {
   const [code, setCode] = useState<string>("");
   const [codeTrans, setCodeTrans] = useState<string>("");
-  const { currentBook, rules, editRuleTrans, apiResult, fetchAll } = useApi();
+  const { currentBook, rules, editRule, apiResult, fetchAll } = useApi();
 
   useEffect(() => {
     const collator = new Intl.Collator([], { numeric: true });
@@ -78,33 +79,41 @@ export default function RuleEditor() {
     });
   }, [codeTrans]);
 
+  const emptyRule = () => ({
+    id: 0,
+    num: "",
+    title: "",
+    text: "",
+    textTrans: "",
+    comments: [],
+    bookId: currentBook.id,
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [ruleNotFound, setRuleNotFound] = useState<string>("");
   const ruleParse = async () => {
-    let ruleCurrent: Rule = {
-      id: -1,
-      num: "",
-      text: "",
-      comments: [],
-      textTrans: "",
-    };
+    setLoading(true);
+    setRuleNotFound("");
+    let ruleCurrent: Rule = { ...emptyRule(), id: -1 };
 
     for (let i = 0; i < codeTrans.split("\n").length; i++) {
       const l = codeTrans.split("\n")[i];
       if (l.startsWith("#")) {
         if (ruleCurrent.id != -1) {
-          const ok = await editRuleTrans(ruleCurrent);
+          const ok = await editRule(ruleCurrent);
           if (!ok) {
+            setLoading(false);
             return;
           }
           // setCodeTrans(codeTrans.split("\n").slice(i).join("\n"));
         }
-        ruleCurrent = {
-          id: 0,
-          num: "",
-          text: "",
-          comments: [],
-          textTrans: "",
-        };
-        ruleCurrent.num = l.slice(1).trim();
+        const num = l.slice(1).trim();
+        ruleCurrent = rules.find((r) => r.num === num);
+        if (ruleCurrent == undefined) {
+          setRuleNotFound(num);
+          setLoading(false);
+          return;
+        }
+        ruleCurrent.textTrans = "";
       } else if (l.startsWith(">")) {
         ruleCurrent.textTrans += l.slice(1).trim() + "\n";
       } else {
@@ -112,13 +121,15 @@ export default function RuleEditor() {
       }
     }
     if (ruleCurrent.num !== "") {
-      const ok = await editRuleTrans(ruleCurrent);
+      const ok = await editRule(ruleCurrent);
       if (!ok) {
+        setLoading(false);
         return;
       }
       // setCodeTrans("");
     }
     fetchAll();
+    setLoading(false);
   };
   return (
     <Container>
@@ -180,15 +191,17 @@ export default function RuleEditor() {
           </Box>
         </Grid>
       </Grid>
-      <Button
+      <LoadingButton
         variant="contained"
         onClick={() => {
           void ruleParse();
         }}
+        loading={loading}
       >
         和訳を保存
-      </Button>
+      </LoadingButton>
       <span>{apiResult.msg}</span>
+      <span>{ruleNotFound !== "" && `エラー: ルール ${ruleNotFound} は存在しません`}</span>
     </Container>
   );
 }

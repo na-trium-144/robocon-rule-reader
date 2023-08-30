@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import LoadingButton from '@mui/lab/LoadingButton';
+import LoadingButton from "@mui/lab/LoadingButton";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
 
@@ -52,7 +52,7 @@ export default function RuleEditor() {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const ruleParse = async () => {
-      setLoading(true);
+    setLoading(true);
     let ruleCurrent: Rule = { ...emptyRule(), id: -1 };
     let categoryCurrent = "";
 
@@ -64,7 +64,7 @@ export default function RuleEditor() {
         if (ruleCurrent.id != -1) {
           const ok = await addRule(ruleCurrent);
           if (!ok) {
-            setLoading(false)
+            setLoading(false);
             return;
           }
           setCode(code.split("\n").slice(i).join("\n"));
@@ -93,13 +93,13 @@ export default function RuleEditor() {
     if (ruleCurrent.num !== "") {
       const ok = await addRule(ruleCurrent);
       if (!ok) {
-        setLoading(false)
+        setLoading(false);
         return;
       }
       setCode("");
     }
     fetchAll();
-      setLoading(false)
+    setLoading(false);
   };
   return (
     <Container>

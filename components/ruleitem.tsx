@@ -24,10 +24,10 @@ import { Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useMediaQuery } from "react-responsive";
 import { useApi } from "components/apiprovider";
 
-const ruleSplitBoth = (rule: string, ruleTrans: string) => {
+const ruleSplitBoth = (rule: string, ruleTrans: string, hasTrans: boolean) => {
   const ruleSplit = rule.split("\n").filter((l) => l !== "");
   const ruleTransSplit = ruleTrans.split("\n").filter((l) => l !== "");
-  if (ruleTransSplit.length === 0) {
+  if (!hasTrans /*ruleTransSplit.length === 0*/) {
     return ruleSplit.map((r) => [r]);
   } else {
     while (ruleSplit.length < ruleTransSplit.length) {
@@ -91,10 +91,11 @@ const RuleTextGrid = (props: {
 };
 export const RuleItem = (props: {
   rule: Rule;
+  hasTrans: boolean;
   onClick: (event: React.MouseEvent) => void;
 }) => {
-  const { rule, onClick } = props;
-  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const { rule, onClick, hasTrans } = props;
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans, hasTrans);
   return (
     <>
       <ListItemButton dense key={rule.num} onClick={onClick}>
@@ -139,11 +140,12 @@ export const RuleItem = (props: {
 
 export const RuleItemActive = (props: {
   rule: Rule;
+  hasTrans: boolean;
   editButtonClick: () => void;
   addComment: (comment: Comment) => void;
   onDelete: () => void;
 }) => {
-  const { rule, editButtonClick, addComment } = props;
+  const { rule, editButtonClick, addComment, hasTrans } = props;
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
   const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
@@ -308,17 +310,15 @@ export const RuleItemActive = (props: {
 
 export const RuleItemActiveEditing = (props: {
   rule: Rule;
+  hasTrans: boolean;
   cancelEditing: () => void;
   editRule: (rule: Rule) => void;
   apiResult: ApiReturnMsg;
 }) => {
-  const { rule, cancelEditing, editRule, apiResult } = props;
+  const { rule, cancelEditing, editRule, apiResult, hasTrans } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
   const [ruleTitle, setRuleTitle] = useState<string>(rule.title);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
-  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(
-    !!rule.textTrans.trim()
-  );
   const [ruleTextTrans, setRuleTextTrans] = useState<string>(
     rule.textTrans.trim()
   );
@@ -401,7 +401,7 @@ export const RuleItemActiveEditing = (props: {
                 size="small"
               />
             </Grid>
-            {ruleHasTrans && (
+            {hasTrans && (
               <Grid item xs={12}>
                 <TextField
                   multiline
