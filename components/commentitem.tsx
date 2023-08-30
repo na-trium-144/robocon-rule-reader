@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Rule, Comment } from "lib/types";
 import { useDrag, useDrop } from "react-dnd";
+import { useApi } from "components/apiprovider";
 
 export const CommentItem = (props: {
   isActive: boolean;
@@ -65,6 +66,7 @@ export const CommentItem = (props: {
     }),
     []
   );
+  const { currentBook } = useApi();
 
   return (
     <div ref={drop}>
@@ -88,7 +90,9 @@ export const CommentItem = (props: {
           <Typography variant="body1" component="span">
             {comment.rule != undefined && (
               <>
-                <Link href={`/rulebook?num=${comment.rule.num}`}>
+                <Link
+                  href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
+                >
                   <Button
                     color="secondary"
                     size="small"
@@ -128,13 +132,17 @@ export const CommentItemEditing = (props: {
 }) => {
   const { isActive, comment, editComment } = props;
   const [text, setText] = useState<string>(comment.text);
+  const { currentBook } = useApi();
+
   return (
     <ListItem dense selected={isActive} sx={{ cursor: "default" }}>
       <Grid container alignItems="center">
         <Grid item>
           {comment.rule != undefined && (
             <>
-              <Link href={`/rulebook?num=${comment.rule.num}`}>
+              <Link
+                href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
+              >
                 <Button
                   color="secondary"
                   size="small"
