@@ -112,15 +112,22 @@ export const CategoryItem = (props: {
     //   return null;
     // });
   }, [draggingCid, droppedCid, commentsSorted, fetchAll, setCommentOrder]);
+
+  const [hovering, setHovering] = useState<boolean>(false);
   return (
     <div ref={drop}>
-      {isOver && (
-        <>
-          <Box sx={{ width: "100%", height: "60px" }} />
-        </>
-      )}
+      {isOver && <Box sx={{ width: "100%", height: "60px" }} />}
       <div ref={drag}>
-        <Typography variant="h6">{category.name}</Typography>
+        <div
+          style={{
+            cursor: "grab",
+            background: hovering ? "rgb(240,240,240)" : "inherit",
+          }}
+          onMouseOver={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
+        >
+          <Typography variant="h6">{category.name}</Typography>
+        </div>
         <List sx={{ width: "100%" }}>
           {commentsSorted.map((m) => (
             <div key={m.id}>

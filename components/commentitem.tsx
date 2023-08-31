@@ -77,7 +77,7 @@ export const CommentItem = (props: {
           <Box sx={{ width: "100%", height: "40px" }} />
         </>
       )}
-      <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
+      <ListItemButton dense selected={isActive} sx={{ cursor: "grab" }}>
         <Box ref={drag} sx={{ width: "100%" }}>
           {isEditingMode && (
             <Checkbox
