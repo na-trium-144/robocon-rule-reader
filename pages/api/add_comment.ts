@@ -3,6 +3,43 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Comment, CommentCreate, ApiReturnMsg } from "lib/types";
 
+export const connectOrCreateCategory = async (
+  categoryName: string,
+  bookId: number
+) => {
+  const existingCategory = await prisma.category.findMany({
+    select: { id: true },
+    where: {
+      AND: {
+        name: categoryName,
+        bookId: bookId,
+      },
+    },
+  });
+  const categories = await prisma.category.findMany({
+    select: { order: true },
+    where: { bookId: bookId },
+    orderBy: { order: "desc" },
+  });
+  let newCategoryOrder = 0;
+  if (categories.length > 1) {
+    newCategoryOrder = categories[0].order;
+  }
+  return {
+    where: {
+      id: existingCategory[0] != null ? existingCategory[0].id : -1,
+    },
+    create: {
+      name: categoryName,
+      book: {
+        connect: {
+          id: bookId,
+        },
+      },
+      order: newCategoryOrder,
+    },
+  };
+};
 export const addComment = async (c: CommentCreate) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   let newOrder = 0;
@@ -14,24 +51,7 @@ export const addComment = async (c: CommentCreate) => {
   if (comments.length >= 1) {
     newOrder = comments[0].order + 1;
   }
-  const existingCategory = await prisma.category.findMany({
-    select: { id: true },
-    where: {
-      AND: {
-        name: c.category.name,
-        bookId: c.bookId,
-      },
-    },
-  });
-  const categories = await prisma.category.findMany({
-    select: { order: true },
-    where: { bookId: c.bookId },
-    orderBy: { order: "desc" },
-  });
-  let newCategoryOrder = 0;
-  if (categories.length > 1) {
-    newCategoryOrder = categories[0].order;
-  }
+
   await prisma.comment
     .create({
       data: {
@@ -43,20 +63,7 @@ export const addComment = async (c: CommentCreate) => {
         },
         order: newOrder,
         category: {
-          connectOrCreate: {
-            where: {
-              id: existingCategory[0] != null ? existingCategory[0].id : -1,
-            },
-            create: {
-              name: c.category.name,
-              book: {
-                connect: {
-                  id: c.bookId,
-                },
-              },
-              order: newCategoryOrder,
-            },
-          },
+          connectOrCreate: await connectOrCreateCategory(c.category.name, c.bookId),
         },
       },
     })

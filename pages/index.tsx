@@ -61,11 +61,15 @@ export default function Home() {
 
   const [categoriesSorted, setCategoriesSorted] = useState<Category[]>([]);
   useEffect(() => {
-    setCategoriesSorted(
-      categories
-        .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-        .filter((c) => c.comments.length > 0)
-    );
+    const categoriesSorted = categories
+      .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
+      .filter((c) => c.comments.length > 0);
+    for (const g of categoriesSorted) {
+      g.comments = g.comments.sort((a, b) =>
+        a.order < b.order ? -1 : a.order > b.order ? 1 : 0
+      );
+    }
+    setCategoriesSorted(categoriesSorted);
   }, [categories]);
   const [draggingAid, setDraggingAid] = useState<number | null>(null);
   const [droppedAid, setDroppedAid] = useState<number | null>(null);
@@ -101,6 +105,50 @@ export default function Home() {
     // });
   }, [draggingAid, droppedAid, fetchAll, categoriesSorted, setCategoryOrder]);
 
+  const [draggingCid, setDraggingCid] = useState<number | null>(null);
+  const [droppedCid, setDroppedCid] = useState<number | null>(null);
+  useEffect(() => {
+    if (draggingCid != null && droppedCid != null) {
+      let draggingCategory: Category | null = null;
+      let draggingComment: Comment | null = null;
+      let droppedCategory: Category | null = null;
+      let droppedCommentIdx: number | null = null;
+      for (const g of categoriesSorted) {
+        draggingComment =
+          draggingComment || g.comments.find((m) => m.id === draggingCid);
+        const i = g.comments.findIndex((m) => m.id === droppedCid);
+        if (i >= 0) {
+          droppedCategory = g;
+          droppedCommentIdx = i;
+        }
+      }
+      const droppedComment =
+        droppedCategory.comments[droppedCommentIdx as number];
+      const previousComment =
+        droppedCategory.comments[(droppedCommentIdx as number) - 1];
+      let newOrder;
+      if (previousComment == undefined) {
+        newOrder = droppedComment.order - 1;
+      } else {
+        newOrder = (previousComment.order + droppedComment.order) / 2;
+      }
+      void (async () => {
+        const ok = await editComment({
+          ...draggingComment,
+          category: { ...droppedCategory, comments: [] },
+          order: newOrder,
+        });
+        if (ok) {
+          fetchAll();
+        }
+      })();
+      setDraggingCid(null);
+      setDroppedCid(null);
+    }
+    //   return null;
+    // });
+  }, [draggingCid, droppedCid, categoriesSorted, fetchAll, setCommentOrder]);
+
   return (
     <Container
       onClick={() => {
@@ -128,16 +176,17 @@ export default function Home() {
               key={g.id}
               category={g}
               activeCid={activeCid}
-              setActiveCid={setActiveCid}
               editingCid={editingCid}
               setEditingCid={setEditingCid}
+              setDraggingCid={setDraggingCid}
+              setDroppedCid={setDroppedCid}
               startDragging={() => {
-                  setDraggingAid(g.id);
-                  setDroppedAid(null);
-                }}
-                dropped={() => {
-                  setDroppedAid(g.id);
-                }}
+                setDraggingAid(g.id);
+                setDroppedAid(null);
+              }}
+              dropped={() => {
+                setDroppedAid(g.id);
+              }}
             />
           ))}
       </DndProvider>

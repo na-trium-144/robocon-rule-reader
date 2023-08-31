@@ -1,14 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Comment, ApiReturnMsg } from "lib/types";
+import { CommentCreate, ApiReturnMsg } from "lib/types";
+import { connectOrCreateCategory } from "./add_comment";
 
-export const editComment = async (c: Comment) => {
+export const editComment = async (c: CommentCreate) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   await prisma.comment
     .update({
-      where:{
-        id:c.id
+      where: {
+        id: c.id,
       },
       data: {
         text: c.text,
@@ -16,15 +17,12 @@ export const editComment = async (c: Comment) => {
           c.category == null
             ? undefined
             : {
-                connectOrCreate: {
-                  where: {
-                    name: c.category.name,
-                  },
-                  create: {
-                    name: c.category.name,
-                  },
-                },
+                connectOrCreate: await connectOrCreateCategory(
+                  c.category.name,
+                  c.bookId
+                ),
               },
+        order: c.order,
       },
     })
     .catch((err) => {
@@ -40,7 +38,7 @@ export default function editCommentRouter(
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Comment;
+    const data = req.body as CommentCreate;
     const ret = await editComment(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);

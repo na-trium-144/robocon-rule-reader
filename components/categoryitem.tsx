@@ -30,18 +30,20 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 export const CategoryItem = (props: {
   category: Category;
   activeCid: number | null;
-  setActiveCid: (cid: number | null) => void;
   editingCid: number | null;
   setEditingCid: (cid: number | null) => void;
+  setDraggingCid: (cid: number | null) => void;
+  setDroppedCid: (cid: number | null) => void;
   startDragging: () => void;
   dropped: () => void;
 }) => {
   const {
     category,
     activeCid,
-    setActiveCid,
     editingCid,
     setEditingCid,
+    setDraggingCid,
+    setDroppedCid,
     startDragging,
     dropped,
   } = props;
@@ -71,47 +73,6 @@ export const CategoryItem = (props: {
   );
 
   const { editComment, fetchAll, setCommentOrder } = useApi();
-  const [commentsSorted, setCommentsSorted] = useState<Comment[]>([]);
-  useEffect(() => {
-    setCommentsSorted(
-      category.comments.sort((a, b) =>
-        a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-      ) as Comment[]
-    );
-  }, [category]);
-  const [draggingCid, setDraggingCid] = useState<number | null>(null);
-  const [droppedCid, setDroppedCid] = useState<number | null>(null);
-  useEffect(() => {
-    if (draggingCid != null && droppedCid != null) {
-      const draggingComment = commentsSorted.find(
-        (m) => m.id === draggingCid
-      ) as Comment;
-      const droppedCommentIdx = commentsSorted.findIndex(
-        (m) => m.id === droppedCid
-      );
-      const droppedComment = commentsSorted[droppedCommentIdx];
-      const previousComment = commentsSorted[droppedCommentIdx - 1];
-      void (async () => {
-        let newOrder;
-        if (previousComment == undefined) {
-          newOrder = droppedComment.order - 1;
-        } else {
-          newOrder = (previousComment.order + droppedComment.order) / 2;
-        }
-        const ok = await setCommentOrder({
-          ...draggingComment,
-          order: newOrder,
-        });
-        if (ok) {
-          fetchAll();
-        }
-      })();
-      setDraggingCid(null);
-      setDroppedCid(null);
-    }
-    //   return null;
-    // });
-  }, [draggingCid, droppedCid, commentsSorted, fetchAll, setCommentOrder]);
 
   const [hovering, setHovering] = useState<boolean>(false);
   return (
@@ -129,7 +90,7 @@ export const CategoryItem = (props: {
           <Typography variant="h6">{category.name}</Typography>
         </div>
         <List sx={{ width: "100%" }}>
-          {commentsSorted.map((m) => (
+          {category.comments.map((m) => (
             <div key={m.id}>
               <ScrollElement id={m.id.toString()} name={m.id.toString()} />
               {editingCid === m.id ? (
