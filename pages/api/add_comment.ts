@@ -11,7 +11,6 @@ export const addComment = async (c: CommentCreate) => {
     where: { category: { name: c.category.name } },
     orderBy: { order: "desc" },
   });
-  console.log(comments);
   if (comments.length >= 1) {
     newOrder = comments[0].order + 1;
   }
@@ -24,6 +23,15 @@ export const addComment = async (c: CommentCreate) => {
       },
     },
   });
+  const categories = await prisma.category.findMany({
+    select: { order: true },
+    where: { bookId: c.bookId },
+    orderBy: { order: "desc" },
+  });
+  let newCategoryOrder = 0;
+  if (categories.length > 1) {
+    newCategoryOrder = categories[0].order;
+  }
   await prisma.comment
     .create({
       data: {
@@ -46,6 +54,7 @@ export const addComment = async (c: CommentCreate) => {
                   id: c.bookId,
                 },
               },
+              order: newCategoryOrder,
             },
           },
         },

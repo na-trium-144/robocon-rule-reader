@@ -44,8 +44,10 @@ export const CommentItem = (props: {
     setChecked,
     isEditingMode,
   } = props;
+
+  const dndType = "comment"
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: comment.category.name,
+    type: dndType,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -57,7 +59,7 @@ export const CommentItem = (props: {
   }, [isDragging, startDragging]);
   const [{ isOver }, drop] = useDrop(
     () => ({
-      accept: comment.category.name,
+      accept: dndType,
       drop: dropped, // droppedが変化してもuseDropの中身は変更できないっぽい。
       //なのでここで呼び出す関数はずっと変更されないものにする必要がある
       collect: (monitor) => ({

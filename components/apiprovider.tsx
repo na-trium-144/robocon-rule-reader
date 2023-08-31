@@ -25,6 +25,7 @@ interface ApiContextI {
   addComment: (comment: Comment) => Promise<boolean>;
   deleteComment: (comment: Comment) => Promise<boolean>;
   setCommentOrder: (comment: Comment) => Promise<boolean>;
+  setCategoryOrder: (category: Category) => Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
 const ApiContext = createContext<ApiContextI>(null as never);
@@ -99,6 +100,8 @@ export function ApiProvider(props: { children: any }) {
   const deleteComment = (comment: Comment) => api("delete_comment", comment);
   const setCommentOrder = (comment: Comment) =>
     api("set_comment_order", comment);
+  const setCategoryOrder = (category: Category) =>
+    api("set_category_order", category);
   useEffect(() => {
     fetchAll();
   }, []);
@@ -121,6 +124,7 @@ export function ApiProvider(props: { children: any }) {
         deleteComment,
         addComment,
         setCommentOrder,
+        setCategoryOrder,
         apiResult,
       }}
     >
