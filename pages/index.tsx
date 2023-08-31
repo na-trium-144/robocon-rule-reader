@@ -30,20 +30,22 @@ import { CategoryItem } from "components/categoryitem";
 
 export default function Home() {
   const { query } = useRouter();
+  // Aid: categoryのid, Cid: commentのid
+
   // スクロール先のコメント (query変化したらセット)
   const [scrollTo, setScrollTo] = useState<number | null>(null);
   // AutoScrollerに渡す値 (commentsの読み込み完了したらセット)
   const [activeCid, setActiveCid] = useState<number | null>(null);
   // 編集中のコメント
   const [editingCid, setEditingCid] = useState<number | null>(null);
+  const [editingAid, setEditingAid] = useState<number | null>(null);
 
   const {
     currentBook,
     categories,
     editComment,
     fetchAll,
-    setCommentOrder,
-    setCategoryOrder,
+    editCategory,
     deleteComment,
   } = useApi();
 
@@ -90,9 +92,10 @@ export default function Home() {
         } else {
           newOrder = (previousCategory.order + droppedCategory.order) / 2;
         }
-        const ok = await setCategoryOrder({
+        const ok = await editCategory({
           ...draggingCategory,
           order: newOrder,
+          comments: [],
         });
         if (ok) {
           fetchAll();
@@ -103,13 +106,12 @@ export default function Home() {
     }
     //   return null;
     // });
-  }, [draggingAid, droppedAid, fetchAll, categoriesSorted, setCategoryOrder]);
+  }, [draggingAid, droppedAid, fetchAll, categoriesSorted, editCategory]);
 
   const [draggingCid, setDraggingCid] = useState<number | null>(null);
   const [droppedCid, setDroppedCid] = useState<number | null>(null);
   useEffect(() => {
     if (draggingCid != null && droppedCid != null) {
-      let draggingCategory: Category | null = null;
       let draggingComment: Comment | null = null;
       let droppedCategory: Category | null = null;
       let droppedCommentIdx: number | null = null;
@@ -147,13 +149,14 @@ export default function Home() {
     }
     //   return null;
     // });
-  }, [draggingCid, droppedCid, categoriesSorted, fetchAll, setCommentOrder]);
+  }, [draggingCid, droppedCid, categoriesSorted, fetchAll, editComment]);
 
   return (
     <Container
       onClick={() => {
         setActiveCid(null);
         setEditingCid(null);
+        setEditingAid(null);
       }}
     >
       <AutoScroller id={activeCid == null ? null : activeCid.toString()} />
@@ -177,7 +180,24 @@ export default function Home() {
               category={g}
               activeCid={activeCid}
               editingCid={editingCid}
-              setEditingCid={setEditingCid}
+              setEditingCid={(cid: number | null) => {
+                setEditingCid(cid);
+                setEditingAid(null);
+              }}
+              isEditing={editingAid === g.id}
+              setIsEditing={(e: boolean) => {
+                setEditingAid(e ? g.id : null);
+                setEditingCid(null);
+              }}
+              editCategory={(category: Category) => {
+                void (async () => {
+                  const ok = await editCategory({ ...category, comments: [] });
+                  if (ok) {
+                    setEditingAid(null);
+                    fetchAll();
+                  }
+                })();
+              }}
               setDraggingCid={setDraggingCid}
               setDroppedCid={setDroppedCid}
               startDragging={() => {

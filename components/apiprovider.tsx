@@ -24,7 +24,7 @@ interface ApiContextI {
   editComment: (comment: Comment) => Promise<boolean>;
   addComment: (comment: Comment) => Promise<boolean>;
   deleteComment: (comment: Comment) => Promise<boolean>;
-  setCategoryOrder: (category: Category) => Promise<boolean>;
+  editCategory: (category: Category) => Promise<boolean>;
   apiResult: ApiReturnMsg;
 }
 const ApiContext = createContext<ApiContextI>(null as never);
@@ -98,8 +98,8 @@ export function ApiProvider(props: { children: any }) {
   const editComment = (comment: Comment) =>
     api("edit_comment", { ...comment, bookId: currentBook.id });
   const deleteComment = (comment: Comment) => api("delete_comment", comment);
-  const setCategoryOrder = (category: Category) =>
-    api("set_category_order", category);
+  const editCategory = (category: Category) =>
+    api("edit_category", category);
   useEffect(() => {
     fetchAll();
   }, []);
@@ -121,7 +121,7 @@ export function ApiProvider(props: { children: any }) {
         editComment,
         deleteComment,
         addComment,
-        setCategoryOrder,
+        editCategory,
         apiResult,
       }}
     >

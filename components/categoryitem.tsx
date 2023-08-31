@@ -17,6 +17,9 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import AutoScroller from "components/scroller";
+import IconButton from "@mui/material/IconButton";
+import CheckIcon from "@mui/icons-material/Check";
+import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import * as React from "react";
@@ -32,6 +35,9 @@ export const CategoryItem = (props: {
   activeCid: number | null;
   editingCid: number | null;
   setEditingCid: (cid: number | null) => void;
+  isEditing: boolean;
+  setIsEditing: (e: boolean) => void;
+  editCategory: (g: Category) => void;
   setDraggingCid: (cid: number | null) => void;
   setDroppedCid: (cid: number | null) => void;
   startDragging: () => void;
@@ -42,6 +48,9 @@ export const CategoryItem = (props: {
     activeCid,
     editingCid,
     setEditingCid,
+    isEditing,
+    setIsEditing,
+    editCategory,
     setDraggingCid,
     setDroppedCid,
     startDragging,
@@ -73,8 +82,9 @@ export const CategoryItem = (props: {
   );
 
   const { editComment, fetchAll, setCommentOrder } = useApi();
-
   const [hovering, setHovering] = useState<boolean>(false);
+  const [text, setText] = useState<string>(category.name);
+
   return (
     <div ref={drop}>
       {isOver && <Box sx={{ width: "100%", height: "60px" }} />}
@@ -87,42 +97,77 @@ export const CategoryItem = (props: {
           onMouseOver={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
-          <Typography variant="h6">{category.name}</Typography>
+          {isEditing ? (
+            <Grid container alignItems="center">
+              <Grid item xs>
+                <TextField
+                  value={text}
+                  fullWidth
+                  variant="standard"
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                  }}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setText(event.target.value);
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    editCategory({ ...category, name: text });
+                  }}
+                >
+                  <CheckIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          ) : (
+            <Typography variant="h6">
+              {category.name}
+              <IconButton
+                color="primary"
+                size="small"
+                sx={{ ml: 1, mr: 1 }}
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  setIsEditing(true);
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            </Typography>
+          )}
         </div>
         <List sx={{ width: "100%" }}>
           {category.comments.map((m) => (
             <div key={m.id}>
               <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-              {editingCid === m.id ? (
-                <CommentItemEditing
-                  isActive={activeCid === m.id}
-                  comment={{ ...m, category: category }}
-                  editComment={(comment: Comment) => {
-                    void (async () => {
-                      const ok = await editComment(comment);
-                      if (ok) {
-                        setEditingCid(null);
-                        fetchAll();
-                      }
-                    })();
-                  }}
-                />
-              ) : (
-                <CommentItem
-                  isActive={activeCid === m.id}
-                  comment={{ ...m, category: category }}
-                  editButtonClick={() => {
-                    setEditingCid(m.id);
-                  }}
-                  startDragging={() => {
-                    setDraggingCid(m.id);
-                    setDroppedCid(null);
-                  }}
-                  dropped={() => {
-                    setDroppedCid(m.id);
-                  }}
-                />
-              )}
+              <CommentItem
+                isEditing={editingCid === m.id}
+                setIsEditing={(e: boolean) => setEditingCid(e ? m.id : null)}
+                isActive={activeCid === m.id}
+                comment={{ ...m, category: category }}
+                editComment={(comment: Comment) => {
+                  void (async () => {
+                    const ok = await editComment(comment);
+                    if (ok) {
+                      setEditingCid(null);
+                      fetchAll();
+                    }
+                  })();
+                }}
+                startDragging={() => {
+                  setDraggingCid(m.id);
+                  setDroppedCid(null);
+                }}
+                dropped={() => {
+                  setDroppedCid(m.id);
+                }}
+              />
             </div>
           ))}
         </List>

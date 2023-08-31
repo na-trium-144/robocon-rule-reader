@@ -3,7 +3,7 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Category, ApiReturnMsg } from "lib/types";
 
-export const setCategoryOrder = async (c: Category) => {
+export const editCategory = async (c: Category) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   await prisma.category
     .update({
@@ -11,6 +11,7 @@ export const setCategoryOrder = async (c: Category) => {
         id: c.id,
       },
       data: {
+        name: c.name,
         order: c.order,
       },
     })
@@ -22,13 +23,13 @@ export const setCategoryOrder = async (c: Category) => {
     });
   return ret;
 };
-export default function setCategoryOrderRouter(
+export default function editCategoryRouter(
   req: NextApiRequest,
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
     const data = req.body as Category;
-    const ret = await setCategoryOrder(data);
+    const ret = await editCategory(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);
   })(req, res);
