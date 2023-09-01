@@ -14,7 +14,7 @@ export default function RuleEditor() {
   const [code, setCode] = useState<string>("");
   const codeBlob = useRef<null | Blob>(null);
   const [objUrl, setObjUrl] = useState<string>("");
-  const { rules, editRuleTrans, apiResult, fetchAll } = useApi();
+  const { rules, currentBook } = useApi();
 
   useEffect(() => {
     const collator = new Intl.Collator([], { numeric: true });
@@ -51,11 +51,11 @@ export default function RuleEditor() {
     codeBlob.current = new Blob([code], { type: "text/plain" });
     const url = window.URL.createObjectURL(codeBlob.current);
     setObjUrl(url);
-  }, []);
+  }, [rules]);
 
   return (
     <Container>
-      <Typography variant="h5">ルールエクスポート</Typography>
+      <Typography variant="h5">ルールエクスポート ({currentBook.name})</Typography>
       <Box sx={{ py: 1 }}>
         <a href={objUrl} download="rule_reader.txt">
           <Button variant="contained">ダウンロード</Button>
