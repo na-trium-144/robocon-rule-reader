@@ -82,74 +82,72 @@ export default function RuleBook() {
         ルールブック原文 ({currentBook.name})
       </Typography>
       <List sx={{ width: "100%" }}>
-        {rules
-          .sort((a, b) => collator.compare(a.num, b.num))
-          .map((rule, i) => (
-            <>
-              <ScrollElement id={rule.num} name={rule.num} />
-              {selectedRuleNum !== rule.num ? (
-                <RuleItem
-                  key={i}
-                  rule={rule}
-                  hasTrans={hasTrans}
-                  onClick={(event: React.MouseEvent) => {
-                    if (!isEditing) {
-                      event.stopPropagation();
-                      setSelectedRuleNum(rule.num);
-                      setIsEditing(false);
-                    }
-                  }}
-                />
-              ) : isEditing ? (
-                <RuleItemActiveEditing
-                  key={i}
-                  rule={rule}
-                  hasTrans={hasTrans}
-                  cancelEditing={() => {
+        {rules.map((rule, i) => (
+          <>
+            <ScrollElement id={rule.num} name={rule.num} />
+            {selectedRuleNum !== rule.num ? (
+              <RuleItem
+                key={i}
+                rule={rule}
+                hasTrans={hasTrans}
+                onClick={(event: React.MouseEvent) => {
+                  if (!isEditing) {
+                    event.stopPropagation();
+                    setSelectedRuleNum(rule.num);
                     setIsEditing(false);
-                  }}
-                  editRule={(rule: Rule) => {
-                    void (async () => {
-                      const ok = await editRule(rule);
-                      if (ok) {
-                        setIsEditing(false);
-                        fetchAll();
-                      }
-                    })();
-                  }}
-                  apiResult={apiResult}
-                />
-              ) : (
-                <RuleItemActive
-                  key={i}
-                  rule={rule}
-                  hasTrans={hasTrans}
-                  editButtonClick={() => {
-                    setIsEditing(true);
-                    apiResult.msg = "";
-                  }}
-                  addComment={(comment: Comment) => {
-                    void (async () => {
-                      const ok = await addComment(comment);
-                      if (ok) {
-                        fetchAll();
-                      }
-                    })();
-                  }}
-                  onDelete={() => {
-                    if (confirm("このルール文を削除しますか?")) {
-                      void (async () => {
-                        const ok = await deleteRule(rule);
-                        if (ok) {
-                          fetchAll();
-                        }
-                      })();
+                  }
+                }}
+              />
+            ) : isEditing ? (
+              <RuleItemActiveEditing
+                key={i}
+                rule={rule}
+                hasTrans={hasTrans}
+                cancelEditing={() => {
+                  setIsEditing(false);
+                }}
+                editRule={(rule: Rule) => {
+                  void (async () => {
+                    const ok = await editRule(rule);
+                    if (ok) {
+                      setIsEditing(false);
+                      fetchAll();
                     }
-                  }}
-                />
-              )}
-            </>
-          ))}
+                  })();
+                }}
+                apiResult={apiResult}
+              />
+            ) : (
+              <RuleItemActive
+                key={i}
+                rule={rule}
+                hasTrans={hasTrans}
+                editButtonClick={() => {
+                  setIsEditing(true);
+                  apiResult.msg = "";
+                }}
+                addComment={(comment: Comment) => {
+                  void (async () => {
+                    const ok = await addComment(comment);
+                    if (ok) {
+                      fetchAll();
+                    }
+                  })();
+                }}
+                onDelete={() => {
+                  if (confirm("このルール文を削除しますか?")) {
+                    void (async () => {
+                      const ok = await deleteRule(rule);
+                      if (ok) {
+                        fetchAll();
+                      }
+                    })();
+                  }
+                }}
+              />
+            )}
+          </>
+        ))}
       </List>
       <div
         style={{ position: "fixed", right: "20px", bottom: "20px", zIndex: 10 }}

@@ -30,6 +30,9 @@ export const categoryInclude = Prisma.validator<Prisma.CategoryInclude>()({
     include: {
       rule: true,
     },
+    orderBy: {
+      order: "asc",
+    },
   },
 });
 const category = Prisma.validator<Prisma.CategoryArgs>()({

@@ -65,18 +65,6 @@ export default function Home() {
     }
   }, [scrollTo, categories]);
 
-  const [categoriesSorted, setCategoriesSorted] = useState<Category[]>([]);
-  useEffect(() => {
-    const categoriesSorted = categories
-      .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-      .filter((c) => c.comments.length > 0);
-    for (const g of categoriesSorted) {
-      g.comments = g.comments.sort((a, b) =>
-        a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-      );
-    }
-    setCategoriesSorted(categoriesSorted);
-  }, [categories]);
   const [draggingCategory, setDraggingCategory] = useState<Category | null>(
     null
   );
@@ -153,51 +141,48 @@ export default function Home() {
         ドラッグ&ドロップでコメントを並べ替えできます。
       </Typography>
       <DndProvider backend={HTML5Backend}>
-        {categories
-          .sort((a, b) => (a.order < b.order ? -1 : a.order > b.order ? 1 : 0))
-          .filter((c) => c.comments.length > 0)
-          .map((g, i, a) => (
-            <CategoryItem
-              key={g.id}
-              category={g}
-              prevCategory={a[i - 1]}
-              activeCid={activeCid}
-              editingCid={editingCid}
-              setEditingCid={(cid: number | null) => {
-                setEditingCid(cid);
-                setEditingAid(null);
-              }}
-              isEditing={editingAid === g.id}
-              setIsEditing={(e: boolean) => {
-                setEditingAid(e ? g.id : null);
-                setEditingCid(null);
-              }}
-              editCategory={(category: Category) => {
-                void (async () => {
-                  const ok = await editCategory({ ...category, comments: [] });
-                  if (ok) {
-                    setEditingAid(null);
-                    fetchAll();
-                  }
-                })();
-              }}
-              setDraggingComment={setDraggingComment}
-              setCommentDrop={setCommentDrop}
-              startDragging={() => {
-                setDraggingCategory(g);
-                setCategoryDrop(null);
-              }}
-              onDrop={() => {
-                let newOrder: number;
-                if (i === 0) {
-                  newOrder = g.order - 1;
-                } else {
-                  newOrder = (g.order + a[i - 1].order) / 2;
+        {categories.map((g, i, a) => (
+          <CategoryItem
+            key={g.id}
+            category={g}
+            prevCategory={a[i - 1]}
+            activeCid={activeCid}
+            editingCid={editingCid}
+            setEditingCid={(cid: number | null) => {
+              setEditingCid(cid);
+              setEditingAid(null);
+            }}
+            isEditing={editingAid === g.id}
+            setIsEditing={(e: boolean) => {
+              setEditingAid(e ? g.id : null);
+              setEditingCid(null);
+            }}
+            editCategory={(category: Category) => {
+              void (async () => {
+                const ok = await editCategory({ ...category, comments: [] });
+                if (ok) {
+                  setEditingAid(null);
+                  fetchAll();
                 }
-                setCategoryDrop({ newOrder });
-              }}
-            />
-          ))}
+              })();
+            }}
+            setDraggingComment={setDraggingComment}
+            setCommentDrop={setCommentDrop}
+            startDragging={() => {
+              setDraggingCategory(g);
+              setCategoryDrop(null);
+            }}
+            onDrop={() => {
+              let newOrder: number;
+              if (i === 0) {
+                newOrder = g.order - 1;
+              } else {
+                newOrder = (g.order + a[i - 1].order) / 2;
+              }
+              setCategoryDrop({ newOrder });
+            }}
+          />
+        ))}
         {draggingComment != null && (
           <div style={{ opacity: "30%" }}>
             <CategoryItem

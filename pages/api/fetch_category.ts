@@ -17,6 +17,9 @@ export default function fetchCategories(
             name: bookName,
           },
         },
+        orderBy: {
+          order: "asc",
+        },
       })
       .catch((err) => {
         status = 500;

@@ -3,6 +3,18 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { Comment, ApiReturnMsg } from "lib/types";
 
+export const deleteEmptyCategories = async () => {
+  await prisma.category
+    .deleteMany({
+      where: {
+        comments: {
+          none: {},
+        },
+      },
+    })
+    .catch((err) => console.log(err));
+};
+
 export const deleteComment = async (c: Comment) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   await prisma.comment
@@ -17,6 +29,7 @@ export const deleteComment = async (c: Comment) => {
       ret.msg = "サーバーエラー";
       console.log(err);
     });
+  await deleteEmptyCategories();
   return ret;
 };
 export default function deleteCommentRouter(

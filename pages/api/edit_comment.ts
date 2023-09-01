@@ -3,6 +3,7 @@ import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
 import { CommentCreate, ApiReturnMsg } from "lib/types";
 import { connectOrCreateCategory } from "./add_comment";
+import { deleteEmptyCategories} from "./delete_comment";
 
 export const editComment = async (c: CommentCreate) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
@@ -31,6 +32,7 @@ export const editComment = async (c: CommentCreate) => {
       ret.msg = "サーバーエラー";
       console.log(err);
     });
+  await deleteEmptyCategories();
   return ret;
 };
 export default function editCommentRouter(

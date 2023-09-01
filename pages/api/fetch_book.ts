@@ -8,6 +8,9 @@ export default function fetchBooks(req: NextApiRequest, res: NextApiResponse) {
     const data = await prisma.book
       .findMany({
         include: bookInclude,
+        orderBy: {
+          name: "asc",
+        },
       })
       .catch((err) => {
         status = 500;

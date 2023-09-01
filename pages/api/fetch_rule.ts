@@ -14,6 +14,9 @@ export default function fetchRules(req: NextApiRequest, res: NextApiResponse) {
             name: bookName,
           },
         },
+        orderBy: {
+          num: "asc",
+        },
       })
       .catch((err) => {
         status = 500;
