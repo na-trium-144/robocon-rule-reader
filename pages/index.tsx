@@ -22,191 +22,36 @@ import { useState, useEffect } from "react";
 import * as React from "react";
 import { Element as ScrollElement } from "react-scroll";
 import { useApi } from "components/apiprovider";
-import { CommentItem, CommentItemEditing } from "components/commentitem";
+import { CommentItem } from "components/commentitem";
 import { Comment, Category } from "lib/types";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-const CategoryView = (props: {
-  category: Category;
-  activeCid: number | null;
-  setActiveCid: (cid: number | null) => void;
-  editingCid: number | null;
-  setEditingCid: (cid: number | null) => void;
-  checkedCids: number[];
-  setCheckedCids: (cids: number[]) => void;
-  isEditingMode: boolean;
-}) => {
-  const {
-    category,
-    activeCid,
-    setActiveCid,
-    editingCid,
-    setEditingCid,
-    checkedCids,
-    setCheckedCids,
-    isEditingMode,
-  } = props;
-  const { editComment, fetchAll, setCommentOrder } = useApi();
-  const [commentsSorted, setCommentsSorted] = useState<Comment[]>([]);
-  useEffect(() => {
-    setCommentsSorted(
-      category.comments.sort((a, b) =>
-        a.order < b.order ? -1 : a.order > b.order ? 1 : 0
-      ) as Comment[]
-    );
-  }, [category]);
-  const [draggingCid, setDraggingCid] = useState<number | null>(null);
-  const [droppedCid, setDroppedCid] = useState<number | null>(null);
-  useEffect(() => {
-    if (draggingCid != null && droppedCid != null) {
-      const draggingComment = commentsSorted.find(
-        (m) => m.id === draggingCid
-      ) as Comment;
-      const droppedCommentIdx = commentsSorted.findIndex(
-        (m) => m.id === droppedCid
-      );
-      const droppedComment = commentsSorted[droppedCommentIdx];
-      const previousComment = commentsSorted[droppedCommentIdx - 1];
-      void (async () => {
-        let newOrder;
-        if (previousComment == undefined) {
-          newOrder = droppedComment.order - 1;
-        } else {
-          newOrder = (previousComment.order + droppedComment.order) / 2;
-        }
-        const ok = await setCommentOrder({
-          ...draggingComment,
-          order: newOrder,
-        });
-        if (ok) {
-          fetchAll();
-        }
-      })();
-      setDraggingCid(null);
-      setDroppedCid(null);
-    }
-    //   return null;
-    // });
-  }, [draggingCid, droppedCid, commentsSorted]);
-  return (
-    <>
-      <div>
-        {isEditingMode ? (
-          <Button
-            variant="text"
-            sx={{ minWidth: 0 }}
-            onClick={() => {
-              if (
-                category.comments.findIndex(
-                  (m) => checkedCids.indexOf(m.id) >= 0
-                ) >= 0
-              ) {
-                // ぜんぶチェック外す
-                setCheckedCids(
-                  checkedCids.filter(
-                    (cid) =>
-                      category.comments.findIndex((m) => cid === m.id) === -1
-                  )
-                );
-              } else {
-                // ぜんぶチェック外してからぜんぶつける
-                setCheckedCids(
-                  checkedCids
-                    .filter(
-                      (cid) =>
-                        category.comments.findIndex((m) => cid === m.id) === -1
-                    )
-                    .concat(category.comments.map((m) => m.id))
-                );
-              }
-            }}
-          >
-            <Typography variant="h6">{category.name}</Typography>
-          </Button>
-        ) : (
-          <Typography variant="h6">{category.name}</Typography>
-        )}
-      </div>
-      <List sx={{ width: "100%" }}>
-        {commentsSorted.map((m, i) => (
-          <div key={m.id}>
-            <ScrollElement id={m.id.toString()} name={m.id.toString()} />
-            {editingCid === m.id ? (
-              <CommentItemEditing
-                isActive={activeCid === m.id}
-                comment={{ ...m, category: category }}
-                editComment={(comment: Comment) => {
-                  void (async () => {
-                    const ok = await editComment(comment);
-                    if (ok) {
-                      setEditingCid(null);
-                      fetchAll();
-                    }
-                  })();
-                }}
-              />
-            ) : (
-              <CommentItem
-                isActive={activeCid === m.id}
-                comment={{ ...m, category: category }}
-                editButtonClick={() => {
-                  setEditingCid(m.id);
-                }}
-                startDragging={() => {
-                  setDraggingCid(m.id);
-                  setDroppedCid(null);
-                }}
-                dropped={() => {
-                  setDroppedCid(m.id);
-                }}
-                checked={checkedCids.indexOf(m.id) >= 0}
-                setChecked={(checked: boolean) => {
-                  if (checked && checkedCids.indexOf(m.id) === -1) {
-                    setCheckedCids(checkedCids.concat([m.id]));
-                  }
-                  if (!checked) {
-                    setCheckedCids(checkedCids.filter((cid) => cid !== m.id));
-                  }
-                }}
-                isEditingMode={isEditingMode}
-              />
-            )}
-          </div>
-        ))}
-      </List>
-    </>
-  );
-};
+import {
+  CategoryItem,
+  CategoryDnDTarget,
+  CommentDnDTarget,
+} from "components/categoryitem";
 
 export default function Home() {
   const { query } = useRouter();
+  // Aid: categoryのid, Cid: commentのid
+
   // スクロール先のコメント (query変化したらセット)
   const [scrollTo, setScrollTo] = useState<number | null>(null);
   // AutoScrollerに渡す値 (commentsの読み込み完了したらセット)
   const [activeCid, setActiveCid] = useState<number | null>(null);
   // 編集中のコメント
   const [editingCid, setEditingCid] = useState<number | null>(null);
-  // 選択モードでチェックがついているコメント
-  const [checkedCids, setCheckedCids] = useState<number[]>([]);
-  // 選択モードかどうか
-  const [isEditingMode, setIsEditingMode] = useState<boolean>(false);
-  // 別のカテゴリに移動のボックスを表示するかどうか
-  const [isCategoryMovingMode, setIsCategoryMovingMode] =
-    useState<boolean>(false);
-  // 移動先カテゴリ名
-  const [categoryMovingName, setCategoryMovingName] = useState<string>("");
-  useEffect(() => {
-    if (!isEditingMode) {
-      setCheckedCids([]);
-      setIsCategoryMovingMode(false);
-    }
-    if (!isCategoryMovingMode) {
-      setCategoryMovingName("");
-    }
-  }, [isEditingMode, isCategoryMovingMode]);
-  const { categories, editComment, fetchAll, setCommentOrder, deleteComment } =
-    useApi();
+  const [editingAid, setEditingAid] = useState<number | null>(null);
+
+  const {
+    currentBook,
+    categories,
+    editComment,
+    fetchAll,
+    editCategory,
+    deleteComment,
+  } = useApi();
 
   useEffect(() => {
     if (typeof query.cid === "string") {
@@ -220,125 +65,152 @@ export default function Home() {
     }
   }, [scrollTo, categories]);
 
-  const collator = new Intl.Collator([], { numeric: true });
+  const [draggingCategory, setDraggingCategory] = useState<Category | null>(
+    null
+  );
+  const [categoryDrop, setCategoryDrop] = useState<CategoryDnDTarget | null>(
+    null
+  );
+  useEffect(() => {
+    if (draggingCategory != null && categoryDrop != null) {
+      void (async () => {
+        const ok = await editCategory({
+          ...draggingCategory,
+          order: categoryDrop.newOrder,
+          comments: [],
+        });
+        if (ok) {
+          fetchAll();
+        }
+      })();
+      setDraggingCategory(null);
+      setCategoryDrop(null);
+    }
+  }, [draggingCategory, categoryDrop, fetchAll, editCategory]);
+
+  const [draggingComment, setDraggingComment] = useState<Comment | null>(null);
+  const [commentDrop, setCommentDrop] = useState<CommentDnDTarget | null>(null);
+  useEffect(() => {
+    if (draggingComment != null && commentDrop != null) {
+      console.log(commentDrop);
+      void (async () => {
+        const ok = await editComment({
+          ...draggingComment,
+          category: { ...commentDrop.category, comments: [] } as Category,
+          order: commentDrop.newOrder,
+        });
+        if (ok) {
+          fetchAll();
+        }
+      })();
+      setDraggingComment(null);
+      setCommentDrop(null);
+    }
+  }, [draggingComment, commentDrop, fetchAll, editComment]);
+
+  const newCategory = {
+    id: -1,
+    name: "(新しいカテゴリー)",
+    order: categories.reduce((o, g) => (g.order > o ? g.order : o), 0),
+    bookId: currentBook.id,
+    comments: [
+      {
+        id: -1,
+        text: "",
+        order: 0,
+        ruleId: -1,
+        categoryId: -1,
+        rule: {
+          id: -1,
+          num: "",
+          title: "",
+          text: "",
+          textTrans: "",
+          bookId: currentBook.id,
+        },
+      },
+    ],
+  };
   return (
     <Container
       onClick={() => {
         setActiveCid(null);
         setEditingCid(null);
+        setEditingAid(null);
       }}
     >
       <AutoScroller id={activeCid == null ? null : activeCid.toString()} />
-      <Typography variant="h5">ルール概要、コメント</Typography>
-      <Typography variant="body1">
+      <Typography variant="h5">
+        ルール概要、コメント ({currentBook.name})
+      </Typography>
+      <Typography variant="body1" sx={{ mb: 1 }}>
         新規ルール・コメントの追加は「インポート」ページから、
         <br />
         既存ルールへのコメントの追加は「原文」ページからできます。
         <br />
         ドラッグ&ドロップでコメントを並べ替えできます。
       </Typography>
-      <div>
-        <ButtonGroup variant={isEditingMode ? "contained" : "outlined"}>
-          <Button
-            onClick={() => {
-              setIsEditingMode(!isEditingMode);
-            }}
-          >
-            コメントを移動/削除...
-          </Button>
-          {isEditingMode && (
-            <>
-              <Button
-                onClick={() => {
-                  setIsCategoryMovingMode(!isCategoryMovingMode);
-                }}
-                disabled={checkedCids.length === 0}
-              >
-                別のカテゴリに移動
-              </Button>
-              <Button
-                onClick={() => {
-                  const allComments = categories.reduce(
-                    (prev, cat) => prev.concat(cat.comments as Comment[]),
-                    [] as Comment[]
-                  );
-                  for (const cid of checkedCids) {
-                    const c = allComments.find((c) => c.id === cid) as Comment;
-                    void (async () => {
-                      const ok = await deleteComment(c);
-                      if (ok) {
-                        setIsEditingMode(false);
-                        fetchAll();
-                      }
-                    })();
-                  }
-                }}
-                disabled={checkedCids.length === 0}
-              >
-                コメントを削除
-              </Button>
-            </>
-          )}
-        </ButtonGroup>
-      </div>
-      {isCategoryMovingMode && (
-        <Grid container spacing={1} alignItems="center">
-          <Grid item>
-            <TextField
-              variant="standard"
-              size="small"
-              placeholder="移動先のカテゴリ名"
-              value={categoryMovingName}
-              onChange={(e) => {
-                setCategoryMovingName(e.target.value);
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <Button
-              onClick={() => {
-                const allComments = categories.reduce(
-                  (prev, cat) => prev.concat(cat.comments as Comment[]),
-                  [] as Comment[]
-                );
-                for (const cid of checkedCids) {
-                  const c = allComments.find((c) => c.id === cid) as Comment;
-                  void (async () => {
-                    const ok = await editComment({
-                      ...c,
-                      category: { name: categoryMovingName, id: 0 },
-                    });
-                    if (ok) {
-                      setIsEditingMode(false);
-                      fetchAll();
-                    }
-                  })();
-                }
-              }}
-              variant="text"
-            >
-              移動
-            </Button>
-          </Grid>
-        </Grid>
-      )}
       <DndProvider backend={HTML5Backend}>
-        {categories
-          .sort((a, b) => collator.compare(a.name, b.name))
-          .filter((c) => c.comments.length > 0)
-          .map((g, i) => (
-            <CategoryView
-              key={g.name}
-              category={g}
-              activeCid={activeCid}
-              setActiveCid={setActiveCid}
-              editingCid={editingCid}
-              setEditingCid={setEditingCid}
-              checkedCids={checkedCids}
-              setCheckedCids={setCheckedCids}
-              isEditingMode={isEditingMode}
+        {categories.map((g, i, a) => (
+          <CategoryItem
+            key={g.id}
+            category={g}
+            prevCategory={a[i - 1]}
+            activeCid={activeCid}
+            editingCid={editingCid}
+            setEditingCid={(cid: number | null) => {
+              setEditingCid(cid);
+              setEditingAid(null);
+            }}
+            isEditing={editingAid === g.id}
+            setIsEditing={(e: boolean) => {
+              setEditingAid(e ? g.id : null);
+              setEditingCid(null);
+            }}
+            editCategory={(category: Category) => {
+              void (async () => {
+                const ok = await editCategory({ ...category, comments: [] });
+                if (ok) {
+                  setEditingAid(null);
+                  fetchAll();
+                }
+              })();
+            }}
+            setDraggingComment={setDraggingComment}
+            setCommentDrop={setCommentDrop}
+            startDragging={() => {
+              setDraggingCategory(g);
+              setCategoryDrop(null);
+            }}
+            onDrop={() => {
+              let newOrder: number;
+              if (i === 0) {
+                newOrder = g.order - 1;
+              } else {
+                newOrder = (g.order + a[i - 1].order) / 2;
+              }
+              setCategoryDrop({ newOrder });
+            }}
+          />
+        ))}
+        {draggingComment != null && (
+          <div style={{ opacity: "30%" }}>
+            <CategoryItem
+              category={newCategory}
+              prevCategory={categories[categories.length - 1]}
+              activeCid={null}
+              editingCid={null}
+              setEditingCid={() => undefined}
+              isEditing={false}
+              setIsEditing={() => undefined}
+              editCategory={() => undefined}
+              setDraggingComment={() => undefined}
+              setCommentDrop={setCommentDrop}
+              startDragging={() => undefined}
+              onDrop={() => undefined}
             />
-          ))}
+          </div>
+        )}
       </DndProvider>
     </Container>
   );

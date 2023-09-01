@@ -22,29 +22,30 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Rule, Comment } from "lib/types";
 import { useDrag, useDrop } from "react-dnd";
+import { useApi } from "components/apiprovider";
 
 export const CommentItem = (props: {
+  isEditing: boolean;
+  setIsEditing: (e: boolean) => void;
+  editComment: (comment: Comment) => void;
   isActive: boolean;
   comment: Comment;
-  editButtonClick: () => void;
   startDragging: () => void;
-  dropped: () => void;
-  checked: boolean;
-  setChecked: (checked: boolean) => void;
-  isEditingMode: boolean;
+  onDrop: () => void;
 }) => {
   const {
+    isEditing,
+    setIsEditing,
+    editComment,
     isActive,
     comment,
-    editButtonClick,
     startDragging,
-    dropped,
-    checked,
-    setChecked,
-    isEditingMode,
+    onDrop,
   } = props;
+
+  const dndType = "comment";
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: comment.category.name,
+    type: dndType,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -56,85 +57,65 @@ export const CommentItem = (props: {
   }, [isDragging, startDragging]);
   const [{ isOver }, drop] = useDrop(
     () => ({
-      accept: comment.category.name,
-      drop: dropped, // droppedが変化してもuseDropの中身は変更できないっぽい。
-      //なのでここで呼び出す関数はずっと変更されないものにする必要がある
+      accept: dndType,
+      drop: onDrop,
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
       }),
     }),
-    []
+    [onDrop]
   );
+  const [text, setText] = useState<string>(comment.text);
+  const { currentBook } = useApi();
+  const [hovering, setHovering] = useState<boolean>(false);
 
   return (
     <div ref={drop}>
-      {isOver && (
-        <>
-          <Box sx={{ width: "100%", height: "40px" }} />
-        </>
-      )}
-      <ListItemButton dense selected={isActive} sx={{ cursor: "default" }}>
-        <Box ref={drag} sx={{ width: "100%" }}>
-          {isEditingMode && (
-            <Checkbox
-              edge="start"
-              checked={checked}
-              disableRipple
-              onClick={() => {
-                setChecked(!checked);
-              }}
-            />
-          )}
-          <Typography variant="body1" component="span">
-            {comment.rule != undefined && (
-              <>
-                <Link href={`/rulebook?num=${comment.rule.num}`}>
-                  <Button
-                    color="secondary"
-                    size="small"
-                    startIcon={<DescriptionOutlinedIcon />}
-                    sx={{ mr: 1, minWidth: 0 }}
-                  >
-                    {comment.rule.num}
-                  </Button>
-                </Link>
-                {comment.text}
-                {!isEditingMode && (
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    sx={{ ml: 1, mr: 1 }}
-                    onClick={(event: React.MouseEvent) => {
-                      event.stopPropagation();
-                      editButtonClick();
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                )}
-              </>
-            )}
-          </Typography>
-        </Box>
-      </ListItemButton>
-    </div>
-  );
-};
-
-export const CommentItemEditing = (props: {
-  isActive: boolean;
-  comment: Comment;
-  editComment: (comment: Comment) => void;
-}) => {
-  const { isActive, comment, editComment } = props;
-  const [text, setText] = useState<string>(comment.text);
-  return (
-    <ListItem dense selected={isActive} sx={{ cursor: "default" }}>
-      <Grid container alignItems="center">
-        <Grid item>
-          {comment.rule != undefined && (
-            <>
-              <Link href={`/rulebook?num=${comment.rule.num}`}>
+      {isOver && <Box sx={{ width: "100%", height: "40px" }} />}
+      <ListItemButton
+        dense
+        selected={isActive}
+        sx={{ cursor: "grab", height: 32 }}
+      >
+        {isEditing ? (
+          <Grid container alignItems="center">
+            <Grid item xs>
+              <TextField
+                value={text}
+                fullWidth
+                variant="standard"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                }}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setText(event.target.value);
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <IconButton
+                color="primary"
+                size="small"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  editComment({ ...comment, text: text });
+                }}
+              >
+                <CheckIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
+        ) : (
+          <Box
+            ref={drag}
+            sx={{ width: "100%" }}
+            onMouseOver={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+          >
+            <Typography variant="body1" component="span">
+              <Link
+                href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
+              >
                 <Button
                   color="secondary"
                   size="small"
@@ -144,35 +125,24 @@ export const CommentItemEditing = (props: {
                   {comment.rule.num}
                 </Button>
               </Link>
-            </>
-          )}
-        </Grid>
-        <Grid item xs>
-          <TextField
-            value={text}
-            fullWidth
-            variant="standard"
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-            }}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setText(event.target.value);
-            }}
-          />
-        </Grid>
-        <Grid item>
-          <IconButton
-            color="primary"
-            size="small"
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-              editComment({ ...comment, text: text });
-            }}
-          >
-            <CheckIcon />
-          </IconButton>
-        </Grid>
-      </Grid>
-    </ListItem>
+              {comment.text}
+              {hovering && (
+                <IconButton
+                  color="primary"
+                  size="small"
+                  sx={{ ml: 1, mr: 1 }}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
+            </Typography>
+          </Box>
+        )}
+      </ListItemButton>
+    </div>
   );
 };

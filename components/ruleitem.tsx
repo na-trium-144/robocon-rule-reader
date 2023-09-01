@@ -22,11 +22,12 @@ import ChatIcon from "@mui/icons-material/Chat";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useMediaQuery } from "react-responsive";
+import { useApi } from "components/apiprovider";
 
-const ruleSplitBoth = (rule: string, ruleTrans: string) => {
+const ruleSplitBoth = (rule: string, ruleTrans: string, hasTrans: boolean) => {
   const ruleSplit = rule.split("\n").filter((l) => l !== "");
   const ruleTransSplit = ruleTrans.split("\n").filter((l) => l !== "");
-  if (ruleTransSplit.length === 0) {
+  if (!hasTrans /*ruleTransSplit.length === 0*/) {
     return ruleSplit.map((r) => [r]);
   } else {
     while (ruleSplit.length < ruleTransSplit.length) {
@@ -90,10 +91,11 @@ const RuleTextGrid = (props: {
 };
 export const RuleItem = (props: {
   rule: Rule;
+  hasTrans: boolean;
   onClick: (event: React.MouseEvent) => void;
 }) => {
-  const { rule, onClick } = props;
-  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const { rule, onClick, hasTrans } = props;
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans, hasTrans);
   return (
     <>
       <ListItemButton dense key={rule.num} onClick={onClick}>
@@ -106,6 +108,9 @@ export const RuleItem = (props: {
           <Grid item xs={12}>
             <Typography variant="body1" component="span" sx={{ mr: 1 }}>
               {rule.num}
+            </Typography>
+            <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+              {rule.title}
             </Typography>
             {rule.comments.length >= 1 && (
               <Badge
@@ -122,7 +127,7 @@ export const RuleItem = (props: {
               </Badge>
             )}
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ pl: 2 }}>
             <Typography variant="body2">
               <RuleTextGrid ruleBoth={ruleBoth} showTransOnMobile={false} />
             </Typography>
@@ -133,58 +138,20 @@ export const RuleItem = (props: {
   );
 };
 
-export const RuleItemCompact = (props: {
-  rule: Rule;
-  onClick: (event: React.MouseEvent) => void;
-}) => {
-  const { rule, onClick } = props;
-  return (
-    <>
-      <ListItemButton dense key={rule.num} onClick={onClick}>
-        <Typography
-          variant="body1"
-          sx={{
-            textOverflow: "ellipsis",
-            width: "100%",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Typography variant="h6" component="span" sx={{ mr: 1 }}>
-            {rule.num}
-          </Typography>
-          {rule.comments.length >= 1 && (
-            <Badge
-              badgeContent={rule.comments.length}
-              overlap="circular"
-              color="warning"
-              sx={{ mr: 1 }}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-            >
-              <ChatIcon color="action" />
-            </Badge>
-          )}
-          {rule.text}
-        </Typography>
-      </ListItemButton>
-    </>
-  );
-};
-
 export const RuleItemActive = (props: {
   rule: Rule;
+  hasTrans: boolean;
   editButtonClick: () => void;
   addComment: (comment: Comment) => void;
   onDelete: () => void;
 }) => {
-  const { rule, editButtonClick, addComment } = props;
+  const { rule, editButtonClick, addComment, hasTrans } = props;
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
-  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans, hasTrans);
   const [copied, setCopied] = useState<boolean>(false);
+  const { currentBook } = useApi();
+
   return (
     <>
       <ListItem
@@ -198,13 +165,17 @@ export const RuleItemActive = (props: {
           <Grid container alignItems="center" spacing={1}>
             <Grid item xs={12} sm="auto">
               <Typography variant="h5">
-                {rule.num}
-                <Link href={`/rulebook?num=${rule.num}`} scroll={false}>
+                <span style={{ paddingRight: 12 }}>{rule.num}</span>
+                {rule.title}
+                <Link
+                  href={`/rulebook?book=${currentBook.name}&num=${rule.num}`}
+                  scroll={false}
+                >
                   <IconButton
                     onClick={() => {
                       navigator?.clipboard
                         ?.writeText(
-                          `${window.location.origin}/rulebook?num=${rule.num}`
+                          `${window.location.origin}/rulebook?book=${currentBook.name}&num=${rule.num}`
                         )
                         .then(() => {
                           setCopied(true);
@@ -273,7 +244,7 @@ export const RuleItemActive = (props: {
                     />
                   </Grid>
                   <Grid item xs>
-                    <Link href={`/?cid=${c.id}`}>
+                    <Link href={`/?book=${currentBook.name}&cid=${c.id}`}>
                       <Typography variant="body2">{c.text}</Typography>
                     </Link>
                   </Grid>
@@ -319,7 +290,12 @@ export const RuleItemActive = (props: {
                         text: newText,
                         ruleId: rule.id,
                         rule: rule,
-                        category: { id: 0, name: newCategory },
+                        category: {
+                          id: 0,
+                          name: newCategory,
+                          bookId: currentBook.id,
+                          order: 0,
+                        },
                         categoryId: 0,
                         order: 0,
                       });
@@ -339,19 +315,20 @@ export const RuleItemActive = (props: {
 
 export const RuleItemActiveEditing = (props: {
   rule: Rule;
+  hasTrans: boolean;
   cancelEditing: () => void;
   editRule: (rule: Rule) => void;
   apiResult: ApiReturnMsg;
 }) => {
-  const { rule, cancelEditing, editRule, apiResult } = props;
+  const { rule, cancelEditing, editRule, apiResult, hasTrans } = props;
   const [ruleNum, setRuleNum] = useState<string>(rule.num);
+  const [ruleTitle, setRuleTitle] = useState<string>(rule.title);
   const [ruleText, setRuleText] = useState<string>(rule.text.trim());
-  const [ruleHasTrans, setRuleHasTrans] = useState<boolean>(
-    !!rule.textTrans.trim()
-  );
   const [ruleTextTrans, setRuleTextTrans] = useState<string>(
     rule.textTrans.trim()
   );
+  const { currentBook } = useApi();
+
   return (
     <>
       <ListItem
@@ -363,7 +340,7 @@ export const RuleItemActiveEditing = (props: {
       >
         <Paper elevation={3} sx={{ p: 2, my: 1, width: "100%" }}>
           <Grid container alignItems="center" spacing={1}>
-            <Grid item xs={12} sm="auto">
+            <Grid item xs={12} sm={2} lg={1}>
               <TextField
                 label="Rule Number"
                 variant="outlined"
@@ -372,6 +349,19 @@ export const RuleItemActiveEditing = (props: {
                   setRuleNum(event.target.value);
                 }}
                 size="small"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm>
+              <TextField
+                label="Title"
+                variant="standard"
+                value={ruleTitle}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setRuleTitle(event.target.value);
+                }}
+                size="small"
+                fullWidth
               />
             </Grid>
             <Grid item>
@@ -381,9 +371,11 @@ export const RuleItemActiveEditing = (props: {
                   editRule({
                     id: rule.id,
                     num: ruleNum,
+                    title: ruleTitle,
                     text: ruleText,
                     textTrans: ruleTextTrans,
                     comments: rule.comments,
+                    bookId: currentBook.id,
                   });
                 }}
               >
@@ -417,7 +409,7 @@ export const RuleItemActiveEditing = (props: {
                 size="small"
               />
             </Grid>
-            {ruleHasTrans && (
+            {hasTrans && (
               <Grid item xs={12}>
                 <TextField
                   multiline

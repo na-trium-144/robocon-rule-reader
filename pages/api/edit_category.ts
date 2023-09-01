@@ -1,17 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Comment, ApiReturnMsg } from "lib/types";
+import { Category, ApiReturnMsg } from "lib/types";
 
-export const setCommentOrder = async (c: Comment) => {
+export const editCategory = async (c: Category) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
-  await prisma.comment
+  await prisma.category
     .update({
-      where:{
-        id:c.id
+      where: {
+        id: c.id,
       },
       data: {
-        order: c.order
+        name: c.name,
+        order: c.order,
       },
     })
     .catch((err) => {
@@ -22,13 +23,13 @@ export const setCommentOrder = async (c: Comment) => {
     });
   return ret;
 };
-export default function setCommentOrderRouter(
+export default function editCategoryRouter(
   req: NextApiRequest,
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Comment;
-    const ret = await setCommentOrder(data);
+    const data = req.body as Category;
+    const ret = await editCategory(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);
   })(req, res);

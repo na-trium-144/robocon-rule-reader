@@ -1,9 +1,46 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Comment, ApiReturnMsg } from "lib/types";
+import { Comment, CommentCreate, ApiReturnMsg } from "lib/types";
 
-export const addComment = async (c: Comment) => {
+export const connectOrCreateCategory = async (
+  categoryName: string,
+  bookId: number
+) => {
+  const existingCategory = await prisma.category.findMany({
+    select: { id: true },
+    where: {
+      AND: {
+        name: categoryName,
+        bookId: bookId,
+      },
+    },
+  });
+  const categories = await prisma.category.findMany({
+    select: { order: true },
+    where: { bookId: bookId },
+    orderBy: { order: "desc" },
+  });
+  let newCategoryOrder = 0;
+  if (categories.length > 1) {
+    newCategoryOrder = categories[0].order;
+  }
+  return {
+    where: {
+      id: existingCategory[0] != null ? existingCategory[0].id : -1,
+    },
+    create: {
+      name: categoryName,
+      book: {
+        connect: {
+          id: bookId,
+        },
+      },
+      order: newCategoryOrder,
+    },
+  };
+};
+export const addComment = async (c: CommentCreate) => {
   const ret: ApiReturnMsg = { status: 200, ok: true, msg: "" };
   let newOrder = 0;
   const comments = await prisma.comment.findMany({
@@ -14,6 +51,7 @@ export const addComment = async (c: Comment) => {
   if (comments.length >= 1) {
     newOrder = comments[0].order + 1;
   }
+
   await prisma.comment
     .create({
       data: {
@@ -25,14 +63,10 @@ export const addComment = async (c: Comment) => {
         },
         order: newOrder,
         category: {
-          connectOrCreate: {
-            where: {
-              name: c.category.name,
-            },
-            create: {
-              name: c.category.name,
-            },
-          },
+          connectOrCreate: await connectOrCreateCategory(
+            c.category.name,
+            c.bookId
+          ),
         },
       },
     })
@@ -49,7 +83,7 @@ export default function addCommentRouter(
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Comment;
+    const data = req.body as CommentCreate;
     const ret = await addComment(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);

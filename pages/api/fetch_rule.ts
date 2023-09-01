@@ -4,10 +4,16 @@ import { Rule, ruleInclude } from "lib/types";
 
 export default function fetchRules(req: NextApiRequest, res: NextApiResponse) {
   void (async (req, res) => {
+    const bookName = req.query.book as string;
     let status = 200;
     const data = await prisma.rule
       .findMany({
         include: ruleInclude,
+        where: {
+          book: {
+            name: bookName,
+          },
+        },
       })
       .catch((err) => {
         status = 500;

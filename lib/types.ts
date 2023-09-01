@@ -1,5 +1,20 @@
 import { Prisma } from "@prisma/client";
 
+export const bookInclude = Prisma.validator<Prisma.BookInclude>()({
+  /*rules: {
+    include: {
+      comments: {
+        include:{
+          category: true,
+        }
+      }
+    },
+  },*/
+});
+const book = Prisma.validator<Prisma.BookArgs>()({ include: bookInclude });
+export type Book = Prisma.BookGetPayload<typeof book>;
+export type BookInfo = Book & { rulesNum: number; commentsNum: number };
+
 export const ruleInclude = Prisma.validator<Prisma.RuleInclude>()({
   comments: {
     include: {
@@ -14,6 +29,9 @@ export const categoryInclude = Prisma.validator<Prisma.CategoryInclude>()({
   comments: {
     include: {
       rule: true,
+    },
+    orderBy: {
+      order: "asc",
     },
   },
 });
@@ -36,3 +54,5 @@ export interface ApiReturnMsg {
   ok: boolean;
   msg: string;
 }
+
+export type CommentCreate = Comment & { bookId: number };
