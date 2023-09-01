@@ -31,7 +31,7 @@ export const CommentItem = (props: {
   isActive: boolean;
   comment: Comment;
   startDragging: () => void;
-  dropped: () => void;
+  onDrop: () => void;
 }) => {
   const {
     isEditing,
@@ -40,7 +40,7 @@ export const CommentItem = (props: {
     isActive,
     comment,
     startDragging,
-    dropped,
+    onDrop,
   } = props;
 
   const dndType = "comment";
@@ -58,51 +58,56 @@ export const CommentItem = (props: {
   const [{ isOver }, drop] = useDrop(
     () => ({
       accept: dndType,
-      drop: dropped, // droppedが変化してもuseDropの中身は変更できないっぽい。
-      //なのでここで呼び出す関数はずっと変更されないものにする必要がある
+      drop: onDrop,
       collect: (monitor) => ({
         isOver: !!monitor.isOver(),
       }),
     }),
-    []
+    [onDrop]
   );
   const [text, setText] = useState<string>(comment.text);
   const { currentBook } = useApi();
+  const [hovering, setHovering] = useState<boolean>(false);
 
   return (
     <div ref={drop}>
       {isOver && <Box sx={{ width: "100%", height: "40px" }} />}
       <ListItemButton dense selected={isActive} sx={{ cursor: "grab" }}>
-        <Box ref={drag} sx={{ width: "100%" }}>
-          {isEditing ? (
-            <Grid container alignItems="center">
-              <Grid item xs>
-                <TextField
-                  value={text}
-                  fullWidth
-                  variant="standard"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                  }}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setText(event.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item>
-                <IconButton
-                  color="primary"
-                  size="small"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    editComment({ ...comment, text: text });
-                  }}
-                >
-                  <CheckIcon />
-                </IconButton>
-              </Grid>
+        {isEditing ? (
+          <Grid container alignItems="center">
+            <Grid item xs>
+              <TextField
+                value={text}
+                fullWidth
+                variant="standard"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                }}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setText(event.target.value);
+                }}
+              />
             </Grid>
-          ) : (
+            <Grid item>
+              <IconButton
+                color="primary"
+                size="small"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  editComment({ ...comment, text: text });
+                }}
+              >
+                <CheckIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
+        ) : (
+          <Box
+            ref={drag}
+            sx={{ width: "100%" }}
+            onMouseOver={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+          >
             <Typography variant="body1" component="span">
               <Link
                 href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
@@ -117,20 +122,22 @@ export const CommentItem = (props: {
                 </Button>
               </Link>
               {comment.text}
-              <IconButton
-                color="primary"
-                size="small"
-                sx={{ ml: 1, mr: 1 }}
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  setIsEditing(true);
-                }}
-              >
-                <EditIcon />
-              </IconButton>
+              {hovering && (
+                <IconButton
+                  color="primary"
+                  size="small"
+                  sx={{ ml: 1, mr: 1 }}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
             </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
       </ListItemButton>
     </div>
   );
