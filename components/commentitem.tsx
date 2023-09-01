@@ -72,7 +72,11 @@ export const CommentItem = (props: {
   return (
     <div ref={drop}>
       {isOver && <Box sx={{ width: "100%", height: "40px" }} />}
-      <ListItemButton dense selected={isActive} sx={{ cursor: "grab" }}>
+      <ListItemButton
+        dense
+        selected={isActive}
+        sx={{ cursor: "grab", height: 32 }}
+      >
         {isEditing ? (
           <Grid container alignItems="center">
             <Grid item xs>

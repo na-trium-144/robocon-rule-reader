@@ -145,7 +145,7 @@ export default function Home() {
       <Typography variant="h5">
         ルール概要、コメント ({currentBook.name})
       </Typography>
-      <Typography variant="body1">
+      <Typography variant="body1" sx={{ mb: 1 }}>
         新規ルール・コメントの追加は「インポート」ページから、
         <br />
         既存ルールへのコメントの追加は「原文」ページからできます。
@@ -199,21 +199,21 @@ export default function Home() {
             />
           ))}
         {draggingComment != null && (
-          <div style={{opacity:"30%"}}>
-          <CategoryItem
-            category={newCategory}
-            prevCategory={categories[categories.length - 1]}
-            activeCid={null}
-            editingCid={null}
-            setEditingCid={() => undefined}
-            isEditing={false}
-            setIsEditing={() => undefined}
-            editCategory={() => undefined}
-            setDraggingComment={() => undefined}
-            setCommentDrop={setCommentDrop}
-            startDragging={() => undefined}
-            onDrop={() => undefined}
-          />
+          <div style={{ opacity: "30%" }}>
+            <CategoryItem
+              category={newCategory}
+              prevCategory={categories[categories.length - 1]}
+              activeCid={null}
+              editingCid={null}
+              setEditingCid={() => undefined}
+              isEditing={false}
+              setIsEditing={() => undefined}
+              editCategory={() => undefined}
+              setDraggingComment={() => undefined}
+              setCommentDrop={setCommentDrop}
+              startDragging={() => undefined}
+              onDrop={() => undefined}
+            />
           </div>
         )}
       </DndProvider>

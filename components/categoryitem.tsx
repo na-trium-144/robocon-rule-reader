@@ -165,23 +165,27 @@ export const CategoryItem = (props: {
                       category: prevCategory,
                       newOrder:
                         prevCategory.comments[prevCategory.comments.length - 1]
-                          .order,
+                          .order + 1,
                     });
                   }
             }
           >
-            <div
-              style={{
+            <Grid
+              container
+              sx={{
                 cursor: "grab",
                 background: hovering ? "rgb(240,240,240)" : "inherit",
-                height: 36,
+                height: 32,
               }}
               onMouseOver={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
+              alignItems="top"
             >
-              <Typography variant="h6">
-                {category.name}
-                {hovering && (
+              <Grid item>
+                <Typography variant="h6">{category.name}</Typography>
+              </Grid>
+              {hovering && (
+                <Grid item>
                   <IconButton
                     color="primary"
                     size="small"
@@ -193,13 +197,13 @@ export const CategoryItem = (props: {
                   >
                     <EditIcon />
                   </IconButton>
-                )}
-              </Typography>
-            </div>
+                </Grid>
+              )}
+            </Grid>
           </CategoryHeader>
         </div>
       )}
-      <List sx={{ width: "100%" }}>
+      <List sx={{ width: "100%", p: 0 }}>
         {category.comments.map((m, i, a) => (
           <div key={m.id}>
             <ScrollElement id={m.id.toString()} name={m.id.toString()} />
