@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "lib/prisma";
-import { bookInclude, bookInclude2 } from "lib/types";
+import { bookInclude } from "lib/types";
 
 export default function fetchBooks(req: NextApiRequest, res: NextApiResponse) {
   void (async (req, res) => {
@@ -16,8 +16,8 @@ export default function fetchBooks(req: NextApiRequest, res: NextApiResponse) {
         status = 500;
         console.log(err);
       });
-    const dataInfo = await Promise.all(
-      data?.map(async (b) => ({
+    const dataInfo = data != undefined && await Promise.all(
+      data.map(async (b) => ({
         ...b,
         rulesNum: (
           await prisma.rule.findMany({

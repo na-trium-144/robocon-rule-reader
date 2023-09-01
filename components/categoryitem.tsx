@@ -21,11 +21,11 @@ import IconButton from "@mui/material/IconButton";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import { useRouter } from "next/router";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactElement } from "react";
 import * as React from "react";
 import { Element as ScrollElement } from "react-scroll";
 import { useApi } from "components/apiprovider";
-import { CommentItem, CommentItemEditing } from "components/commentitem";
+import { CommentItem } from "components/commentitem";
 import { Comment, Category } from "lib/types";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -40,7 +40,7 @@ export interface CategoryDnDTarget {
 
 const CategoryHeader = (props: {
   onDrop: undefined | (() => void);
-  children: ReactNode;
+  children: ReactElement;
 }) => {
   const { onDrop } = props;
   const dndType = "comment";
@@ -222,7 +222,7 @@ export const CategoryItem = (props: {
                 })();
               }}
               startDragging={() => {
-                setDraggingComment(m);
+                setDraggingComment({ ...m, category });
                 setCommentDrop(null);
               }}
               onDrop={() => {

@@ -23,11 +23,11 @@ import FolderIcon from "@mui/icons-material/Folder";
 import ArticleIcon from "@mui/icons-material/Article";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import { useState, useEffect } from "react";
-import { Book } from "lib/types";
+import { Book, BookInfo } from "lib/types";
 import { useDrag, useDrop } from "react-dnd";
 
 export const BookItem = (props: {
-  book: Book;
+  book: BookInfo;
   editButtonClick: () => void;
 }) => {
   const { book, editButtonClick } = props;
@@ -81,7 +81,7 @@ export const BookItem = (props: {
 };
 
 export const BookItemEditing = (props: {
-  book: Book;
+  book: BookInfo;
   editBook: (book: Book) => void;
 }) => {
   const { book, editBook } = props;
@@ -108,7 +108,7 @@ export const BookItemEditing = (props: {
             size="small"
             onClick={(event: React.MouseEvent) => {
               event.stopPropagation();
-              editBook({ ...book, rules: [], name: text });
+              editBook({ ...book, name: text });
             }}
           >
             <CheckIcon />

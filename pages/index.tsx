@@ -22,7 +22,7 @@ import { useState, useEffect } from "react";
 import * as React from "react";
 import { Element as ScrollElement } from "react-scroll";
 import { useApi } from "components/apiprovider";
-import { CommentItem, CommentItemEditing } from "components/commentitem";
+import { CommentItem } from "components/commentitem";
 import { Comment, Category } from "lib/types";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -96,7 +96,7 @@ export default function Home() {
       void (async () => {
         const ok = await editComment({
           ...draggingComment,
-          category: { ...commentDrop.category, comments: [] },
+          category: { ...commentDrop.category, comments: [] } as Category,
           order: commentDrop.newOrder,
         });
         if (ok) {
@@ -112,12 +112,22 @@ export default function Home() {
     id: -1,
     name: "(新しいカテゴリー)",
     order: categories.reduce((o, g) => (g.order > o ? g.order : o), 0),
+    bookId: currentBook.id,
     comments: [
       {
         id: -1,
         text: "",
         order: 0,
-        rule: { num: "" },
+        ruleId: -1,
+        categoryId: -1,
+        rule: {
+          id: -1,
+          num: "",
+          title: "",
+          text: "",
+          textTrans: "",
+          bookId: currentBook.id,
+        },
       },
     ],
   };

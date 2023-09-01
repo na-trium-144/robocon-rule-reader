@@ -42,9 +42,7 @@ export function ApiProvider(props: { children: any }) {
   const [rules, setRules] = useState<Rule[]>([]);
   useEffect(() => {
     const qbook =
-      typeof query.book === "string"
-        ? query.book
-        : books.sort((a, b) => a.name > b.name)[0]?.name || "";
+      typeof query.book === "string" ? query.book : books[0]?.name || "";
     const book = books.find((b) => b.name === qbook);
     if (book != undefined) {
       setCurrentBook(book);
@@ -98,8 +96,7 @@ export function ApiProvider(props: { children: any }) {
   const editComment = (comment: Comment) =>
     api("edit_comment", { ...comment, bookId: currentBook.id });
   const deleteComment = (comment: Comment) => api("delete_comment", comment);
-  const editCategory = (category: Category) =>
-    api("edit_category", category);
+  const editCategory = (category: Category) => api("edit_category", category);
   useEffect(() => {
     fetchAll();
   }, []);

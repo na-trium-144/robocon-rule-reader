@@ -26,7 +26,7 @@ export const addBook = async (book: Book) => {
         console.log(err);
       }
     });
-  return [retBook, ret];
+  return { retBook, ret };
 };
 export default function addBookRouter(
   req: NextApiRequest,
@@ -34,7 +34,7 @@ export default function addBookRouter(
 ) {
   void (async (req, res) => {
     const data = req.body as Book;
-    const [retBook, ret] = await addBook(data);
+    const { retBook, ret } = await addBook(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);
   })(req, res);

@@ -148,7 +148,7 @@ export const RuleItemActive = (props: {
   const { rule, editButtonClick, addComment, hasTrans } = props;
   const [newCategory, setNewCategory] = useState<string>("");
   const [newText, setNewText] = useState<string>("");
-  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans);
+  const ruleBoth = ruleSplitBoth(rule.text, rule.textTrans, hasTrans);
   const [copied, setCopied] = useState<boolean>(false);
   const { currentBook } = useApi();
 
@@ -290,7 +290,12 @@ export const RuleItemActive = (props: {
                         text: newText,
                         ruleId: rule.id,
                         rule: rule,
-                        category: { id: 0, name: newCategory },
+                        category: {
+                          id: 0,
+                          name: newCategory,
+                          bookId: currentBook.id,
+                          order: 0,
+                        },
                         categoryId: 0,
                         order: 0,
                       });
@@ -322,6 +327,8 @@ export const RuleItemActiveEditing = (props: {
   const [ruleTextTrans, setRuleTextTrans] = useState<string>(
     rule.textTrans.trim()
   );
+  const { currentBook } = useApi();
+
   return (
     <>
       <ListItem
@@ -368,6 +375,7 @@ export const RuleItemActiveEditing = (props: {
                     text: ruleText,
                     textTrans: ruleTextTrans,
                     comments: rule.comments,
+                    bookId: currentBook.id,
                   });
                 }}
               >

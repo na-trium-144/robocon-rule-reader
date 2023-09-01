@@ -81,7 +81,12 @@ export default function RuleEditor() {
         ruleCurrent.comments.push({
           id: 0,
           text: l.slice(1).trim(),
-          category: { id: 0, name: categoryCurrent },
+          category: {
+            id: 0,
+            name: categoryCurrent,
+            bookId: currentBook.id,
+            order: 0,
+          },
           categoryId: 0,
           ruleId: 0,
           order: 0,

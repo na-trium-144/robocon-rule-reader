@@ -107,8 +107,10 @@ export default function RuleEditor() {
           // setCodeTrans(codeTrans.split("\n").slice(i).join("\n"));
         }
         const num = l.slice(1).trim();
-        ruleCurrent = rules.find((r) => r.num === num);
-        if (ruleCurrent == undefined) {
+        const rf = rules.find((r) => r.num === num);
+        if (rf) {
+          ruleCurrent = rf;
+        } else {
           setRuleNotFound(num);
           setLoading(false);
           return;
@@ -201,7 +203,9 @@ export default function RuleEditor() {
         和訳を保存
       </LoadingButton>
       <span>{apiResult.msg}</span>
-      <span>{ruleNotFound !== "" && `エラー: ルール ${ruleNotFound} は存在しません`}</span>
+      <span>
+        {ruleNotFound !== "" && `エラー: ルール ${ruleNotFound} は存在しません`}
+      </span>
     </Container>
   );
 }

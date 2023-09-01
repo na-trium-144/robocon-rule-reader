@@ -63,7 +63,10 @@ export const addComment = async (c: CommentCreate) => {
         },
         order: newOrder,
         category: {
-          connectOrCreate: await connectOrCreateCategory(c.category.name, c.bookId),
+          connectOrCreate: await connectOrCreateCategory(
+            c.category.name,
+            c.bookId
+          ),
         },
       },
     })
@@ -80,7 +83,7 @@ export default function addCommentRouter(
   res: NextApiResponse<ApiReturnMsg>
 ) {
   void (async (req, res) => {
-    const data = req.body as Comment;
+    const data = req.body as CommentCreate;
     const ret = await addComment(data);
     await prisma.$disconnect();
     res.status(ret.status).json(ret);

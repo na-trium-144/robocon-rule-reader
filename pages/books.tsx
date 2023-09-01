@@ -30,37 +30,35 @@ export default function Books() {
     <Container sx={{ width: "100%", height: "100%" }}>
       <Typography variant="h5">ルールブック</Typography>
       <List sx={{ width: "100%" }}>
-        {books
-          .sort((a, b) => a.name > b.name)
-          .map((b, i) =>
-            b.id === editingBid ? (
-              <>
-                <BookItemEditing
-                  key={i}
-                  book={b}
-                  editBook={(book: Book) => {
-                    void (async () => {
-                      const ok = await editBook(book);
-                      if (ok) {
-                        setEditingBid(null);
-                        fetchAll();
-                      }
-                    })();
-                  }}
-                />
-                <Divider />
-              </>
-            ) : (
-              <>
-                <BookItem
-                  key={i}
-                  book={b}
-                  editButtonClick={() => setEditingBid(b.id)}
-                />
-                <Divider />
-              </>
-            )
-          )}
+        {books.map((b, i) =>
+          b.id === editingBid ? (
+            <>
+              <BookItemEditing
+                key={i}
+                book={b}
+                editBook={(book: Book) => {
+                  void (async () => {
+                    const ok = await editBook(book);
+                    if (ok) {
+                      setEditingBid(null);
+                      fetchAll();
+                    }
+                  })();
+                }}
+              />
+              <Divider />
+            </>
+          ) : (
+            <>
+              <BookItem
+                key={i}
+                book={b}
+                editButtonClick={() => setEditingBid(b.id)}
+              />
+              <Divider />
+            </>
+          )
+        )}
       </List>
       <Grid container spacing={1} alignItems="center">
         <Grid item>ルールブックを追加:</Grid>
@@ -84,7 +82,7 @@ export default function Books() {
             startIcon={<AddCircleIcon />}
             onClick={() => {
               void (async () => {
-                const ok = await addBook({ id: 0, name: newName, rules: [] });
+                const ok = await addBook({ id: 0, name: newName });
                 if (ok) {
                   setNewName("");
                   fetchAll();
