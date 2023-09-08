@@ -120,6 +120,8 @@ export default function Home() {
         order: 0,
         ruleId: -1,
         categoryId: -1,
+        externalLink: null,
+        externalName: null,
         rule: {
           id: -1,
           num: "",

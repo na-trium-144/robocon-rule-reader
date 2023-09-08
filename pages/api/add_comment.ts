@@ -56,12 +56,17 @@ export const addComment = async (c: CommentCreate) => {
     .create({
       data: {
         text: c.text,
-        rule: {
-          connect: {
-            id: c.ruleId,
-          },
-        },
+        rule:
+          c.ruleId != null
+            ? {
+                connect: {
+                  id: c.ruleId,
+                },
+              }
+            : undefined,
         order: newOrder,
+        externalLink: c.externalLink,
+        externalName: c.externalName,
         category: {
           connectOrCreate: await connectOrCreateCategory(
             c.category.name,

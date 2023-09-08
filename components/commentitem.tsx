@@ -177,7 +177,7 @@ export const CommentItem = (props: {
             onMouseLeave={() => setHovering(false)}
           >
             <Typography variant="body1" component="span">
-              {comment.ruleId != null && (
+              {comment.rule != null && (
                 <Link
                   href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
                 >

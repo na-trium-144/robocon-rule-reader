@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
-import { highlighter } from "./editor";
+import { highlighter, ruleText, ruleParse } from "components/syntax";
 
 export default function RuleEditor() {
   const [code, setCode] = useState<string>("");
@@ -21,34 +21,14 @@ export default function RuleEditor() {
     setCode(
       rules
         .sort((a, b) => collator.compare(a.num, b.num))
-        .reduce(
-          (prev, rule) =>
-            prev +
-            `#${rule.num}\n` +
-            rule.text
-              .split("\n")
-              .filter((l, i) => i === 0 || l.length > 0)
-              .map((l) => `>${l}`)
-              .join("\n") +
-            "\n\n",
-          ""
-        )
+        .map((rule) => ruleText(rule, { text: true }))
+        .join("")
     );
     setCodeTrans(
       rules
         .sort((a, b) => collator.compare(a.num, b.num))
-        .reduce(
-          (prev, rule) =>
-            prev +
-            `#${rule.num}\n` +
-            (rule.textTrans || "")
-              .split("\n")
-              .filter((l, i) => i === 0 || l.length > 0)
-              .map((l) => `>${l}`)
-              .join("\n") +
-            "\n\n",
-          ""
-        )
+        .map((rule) => ruleText(rule, { textTrans: true }))
+        .join("")
     );
   }, []);
   useEffect(() => {
@@ -79,56 +59,29 @@ export default function RuleEditor() {
     });
   }, [codeTrans]);
 
-  const emptyRule = () => ({
-    id: 0,
-    num: "",
-    title: "",
-    text: "",
-    textTrans: "",
-    comments: [],
-    bookId: currentBook.id,
-  });
   const [loading, setLoading] = useState<boolean>(false);
   const [ruleNotFound, setRuleNotFound] = useState<string>("");
-  const ruleParse = async () => {
+  const ruleSend = async () => {
     setLoading(true);
     setRuleNotFound("");
-    let ruleCurrent: Rule = { ...emptyRule(), id: -1 };
-
-    for (let i = 0; i < codeTrans.split("\n").length; i++) {
-      const l = codeTrans.split("\n")[i];
-      if (l.startsWith("#")) {
-        if (ruleCurrent.id != -1) {
-          const ok = await editRule(ruleCurrent);
-          if (!ok) {
-            setLoading(false);
-            return;
-          }
-          // setCodeTrans(codeTrans.split("\n").slice(i).join("\n"));
-        }
-        const num = l.slice(1).trim();
-        const rf = rules.find((r) => r.num === num);
-        if (rf) {
-          ruleCurrent = rf;
-        } else {
-          setRuleNotFound(num);
+    const rulesTrans = ruleParse(currentBook.id, codeTrans);
+    for (const { ln, rule } of rulesTrans) {
+      const rf = rules.find((r) => r.num === rule.num);
+      if (rf) {
+        const ok = await editRule({
+          ...rf,
+          ...rule,
+        });
+        if (!ok) {
           setLoading(false);
           return;
         }
-        ruleCurrent.textTrans = "";
-      } else if (l.startsWith(">")) {
-        ruleCurrent.textTrans += l.slice(1).trim() + "\n";
+        // setCodeTrans(codeTrans.split("\n").slice(i).join("\n"));
       } else {
-        // skip
-      }
-    }
-    if (ruleCurrent.num !== "") {
-      const ok = await editRule(ruleCurrent);
-      if (!ok) {
+        setRuleNotFound(rule.num);
         setLoading(false);
         return;
       }
-      // setCodeTrans("");
     }
     fetchAll();
     setLoading(false);
@@ -196,7 +149,7 @@ export default function RuleEditor() {
       <LoadingButton
         variant="contained"
         onClick={() => {
-          void ruleParse();
+          void ruleSend();
         }}
         loading={loading}
       >

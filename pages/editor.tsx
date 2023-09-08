@@ -8,100 +8,23 @@ import Button from "@mui/material/Button";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useApi } from "components/apiprovider";
 import { Rule, Comment } from "lib/types";
-
-export const highlighter = (code: string) => {
-  const colorSelector = (l: string) => {
-    if (l.startsWith("##")) {
-      return "green";
-    } else if (l.startsWith("#")) {
-      return "brown";
-    } else if (l.startsWith(">>")) {
-      return "blue";
-    } else if (l.startsWith(">")) {
-      return "green";
-    } else if (l.startsWith("@")) {
-      return "orange";
-    } else if (l.startsWith("-")) {
-      return "inherit";
-    } else {
-      return "gray";
-    }
-  };
-  return (
-    <>
-      {code.split("\n").map((l, i) => (
-        <div key={i} style={{ color: colorSelector(l) }}>
-          {l || " "}
-        </div>
-      ))}
-    </>
-  );
-};
+import { ruleParse, highlighter } from "components/syntax";
 
 export default function RuleEditor() {
   const [code, setCode] = useState("");
   const { currentBook, addRule, apiResult, fetchAll } = useApi();
-  const emptyRule = () => ({
-    id: 0,
-    num: "",
-    title: "",
-    text: "",
-    textTrans: "",
-    comments: [],
-    bookId: currentBook.id,
-  });
-  const [loading, setLoading] = useState<boolean>(false);
-  const ruleParse = async () => {
-    setLoading(true);
-    let ruleCurrent: Rule = { ...emptyRule(), id: -1 };
-    let categoryCurrent = "";
 
-    for (let i = 0; i < code.split("\n").length; i++) {
-      const l = code.split("\n")[i];
-      if (l.startsWith("##")) {
-        ruleCurrent.title = l.slice(2).trim();
-      } else if (l.startsWith("#")) {
-        if (ruleCurrent.id != -1) {
-          const ok = await addRule(ruleCurrent);
-          if (!ok) {
-            setLoading(false);
-            return;
-          }
-          setCode(code.split("\n").slice(i).join("\n"));
-        }
-        ruleCurrent = emptyRule();
-        ruleCurrent.num = l.slice(1).trim();
-      } else if (l.startsWith(">>")) {
-        ruleCurrent.textTrans += l.slice(2).trim() + "\n";
-      } else if (l.startsWith(">")) {
-        ruleCurrent.text += l.slice(1).trim() + "\n";
-      } else if (l.startsWith("@")) {
-        categoryCurrent = l.slice(1).trim();
-      } else if (l.startsWith("-")) {
-        ruleCurrent.comments.push({
-          id: 0,
-          text: l.slice(1).trim(),
-          category: {
-            id: 0,
-            name: categoryCurrent,
-            bookId: currentBook.id,
-            order: 0,
-          },
-          categoryId: 0,
-          ruleId: 0,
-          order: 0,
-        });
-      } else {
-        // skip
-      }
-    }
-    if (ruleCurrent.num !== "") {
-      const ok = await addRule(ruleCurrent);
+  const [loading, setLoading] = useState<boolean>(false);
+  const ruleSend = async () => {
+    setLoading(true);
+    const rules = ruleParse(currentBook.id, code);
+    for(const {ln, rule} of rules){
+      const ok = await addRule(rule);
       if (!ok) {
         setLoading(false);
         return;
       }
-      setCode("");
+      setCode(code.split("\n").slice(ln).join("\n"));
     }
     fetchAll();
     setLoading(false);
@@ -147,7 +70,7 @@ export default function RuleEditor() {
       <LoadingButton
         variant="contained"
         onClick={() => {
-          void ruleParse();
+          void ruleSend();
         }}
         loading={loading}
       >

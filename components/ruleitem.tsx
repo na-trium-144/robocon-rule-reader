@@ -298,6 +298,8 @@ export const RuleItemActive = (props: {
                         },
                         categoryId: 0,
                         order: 0,
+                        externalLink: null,
+                        externalName: null,
                       });
                     }}
                   >
