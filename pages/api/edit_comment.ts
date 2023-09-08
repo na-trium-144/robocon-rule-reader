@@ -24,6 +24,8 @@ export const editComment = async (c: CommentCreate) => {
                 ),
               },
         order: c.order,
+        externalLink: c.externalLink,
+        externalName: c.externalName,
       },
     })
     .catch((err) => {

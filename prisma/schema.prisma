@@ -11,35 +11,40 @@ datasource db {
 }
 
 model Book {
-  id Int @id @default(autoincrement())
-  name String @unique
-  rules Rule[]
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  rules      Rule[]
   categories Category[]
 }
+
 model Category {
-  id Int @id @default(autoincrement())
-  name String
+  id       Int       @id @default(autoincrement())
+  name     String
   comments Comment[]
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId Int
-  order Float @default(0)
+  book     Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId   Int
+  order    Float     @default(0)
 }
+
 model Rule {
-  id   Int    @id @default(autoincrement())
-  num  String
-  title String
-  text String
+  id        Int       @id @default(autoincrement())
+  num       String
+  title     String
+  text      String
   textTrans String
-  comments Comment[]
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId Int
+  comments  Comment[]
+  book      Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int
 }
+
 model Comment {
-  id   Int    @id @default(autoincrement())
-  text String
-  rule    Rule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
-  ruleId  Int
-  category Category @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId Int
-  order Float @default(0)
+  id           Int      @id @default(autoincrement())
+  text         String
+  rule         Rule?    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  ruleId       Int?
+  externalLink String?
+  externalName String?
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId   Int
+  order        Float    @default(0)
 }

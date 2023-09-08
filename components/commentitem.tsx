@@ -19,6 +19,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TextField from "@mui/material/TextField";
 import Link from "next/link";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useState, useEffect } from "react";
 import { Rule, Comment } from "lib/types";
 import { useDrag, useDrop } from "react-dnd";
@@ -66,46 +68,108 @@ export const CommentItem = (props: {
     [onDrop]
   );
   const [text, setText] = useState<string>(comment.text);
+  const [extName, setExtName] = useState<string>(comment.externalName || "");
+  const [extLink, setExtLink] = useState<string>(comment.externalLink || "");
+  const [hasLink, setHasLink] = useState<boolean>(
+    comment.externalLink != "" && comment.externalLink != null
+  );
   const { currentBook } = useApi();
   const [hovering, setHovering] = useState<boolean>(false);
+  const send = () => {
+    editComment({
+      ...comment,
+      text: text,
+      externalLink: hasLink ? extLink : null,
+      externalName: hasLink ? extName : null,
+    });
+  };
 
   return (
     <div ref={drop}>
       {isOver && <Box sx={{ width: "100%", height: "40px" }} />}
-      <ListItemButton
-        dense
-        selected={isActive}
-        sx={{ cursor: "grab", height: 32 }}
-      >
-        {isEditing ? (
+      {isEditing ? (
+        <ListItem
+          dense
+          selected={isActive}
+          sx={{ height: hasLink ? 80 : 32 }}
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation();
+          }}
+        >
           <Grid container alignItems="center">
+            <Grid item>
+              <Checkbox
+                color="success"
+                icon={<OpenInNewIcon />}
+                checkedIcon={<OpenInNewIcon />}
+                checked={hasLink}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setHasLink(event.target.checked);
+                }}
+              />
+            </Grid>
             <Grid item xs>
               <TextField
                 value={text}
                 fullWidth
                 variant="standard"
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                }}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setText(event.target.value);
                 }}
               />
             </Grid>
             <Grid item>
-              <IconButton
-                color="primary"
-                size="small"
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  editComment({ ...comment, text: text });
-                }}
-              >
+              <IconButton color="primary" size="small" onClick={send}>
                 <CheckIcon />
               </IconButton>
             </Grid>
+            {hasLink && (
+              <>
+                <Grid item xs={12} />
+                <Grid item></Grid>
+                <Grid item xs={4} sm={2} md={1.5} lg={1} sx={{ px: 1 }}>
+                  <TextField
+                    value={extName}
+                    fullWidth
+                    size="small"
+                    variant="standard"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setExtName(event.target.value);
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <OpenInNewIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    value={extLink}
+                    fullWidth
+                    size="small"
+                    placeholder="URL"
+                    variant="standard"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setExtLink(event.target.value);
+                    }}
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
-        ) : (
+        </ListItem>
+      ) : (
+        <ListItemButton
+          dense
+          selected={isActive}
+          sx={{ cursor: "grab", height: 32 }}
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation();
+          }}
+        >
           <Box
             ref={drag}
             sx={{ width: "100%" }}
@@ -113,18 +177,32 @@ export const CommentItem = (props: {
             onMouseLeave={() => setHovering(false)}
           >
             <Typography variant="body1" component="span">
-              <Link
-                href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
-              >
-                <Button
-                  color="secondary"
-                  size="small"
-                  startIcon={<DescriptionOutlinedIcon />}
-                  sx={{ mr: 1, minWidth: 0 }}
+              {comment.ruleId != null && (
+                <Link
+                  href={`/rulebook?book=${currentBook.name}&num=${comment.rule.num}`}
                 >
-                  {comment.rule.num}
-                </Button>
-              </Link>
+                  <Button
+                    color="secondary"
+                    size="small"
+                    startIcon={<DescriptionOutlinedIcon />}
+                    sx={{ mr: 1, minWidth: 0, textTransform: "none" }}
+                  >
+                    {comment.rule.num}
+                  </Button>
+                </Link>
+              )}
+              {comment.externalName != null && comment.externalLink != null && (
+                <a href={comment.externalLink} target="_blank" rel="noreferrer">
+                  <Button
+                    color="success"
+                    size="small"
+                    startIcon={<OpenInNewIcon />}
+                    sx={{ mr: 1, minWidth: 0, textTransform: "none" }}
+                  >
+                    {comment.externalName}
+                  </Button>
+                </a>
+              )}
               {comment.text}
               {hovering && (
                 <IconButton
@@ -141,8 +219,8 @@ export const CommentItem = (props: {
               )}
             </Typography>
           </Box>
-        )}
-      </ListItemButton>
+        </ListItemButton>
+      )}
     </div>
   );
 };
