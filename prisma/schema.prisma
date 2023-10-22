@@ -39,7 +39,7 @@ model Comment {
   text String
   rule    Rule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
   ruleId  Int
-  category Category @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId Int
   order Float @default(0)
 }

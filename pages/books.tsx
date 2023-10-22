@@ -17,13 +17,14 @@ import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import { useRouter } from "next/router";
 import { Element as ScrollElement } from "react-scroll";
-import { Book, Rule, ApiReturnMsg, Comment } from "lib/types";
+import { Book, BookInfo, Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useApi } from "components/apiprovider";
 import { BookItem, BookItemEditing } from "components/bookitem";
 import Link from "next/link";
 
 export default function Books() {
-  const { books, fetchAll, apiResult, editBook, addBook } = useApi();
+  const { books, fetchAll, apiResult, editBook, addBook, deleteBook } =
+    useApi();
   const [editingBid, setEditingBid] = useState<null | number>(null);
   const [newName, setNewName] = useState<string>("");
   return (
@@ -36,7 +37,7 @@ export default function Books() {
               <BookItemEditing
                 key={i}
                 book={b}
-                editBook={(book: Book) => {
+                editBook={(book: BookInfo) => {
                   void (async () => {
                     const ok = await editBook(book);
                     if (ok) {
@@ -44,6 +45,22 @@ export default function Books() {
                       fetchAll();
                     }
                   })();
+                }}
+                deleteBook={(book: BookInfo) => {
+                  if (
+                    confirm(
+                      "このルールブックを削除しますか?\n" +
+                        `(${book.rulesNum}個のルールと${book.commentsNum}個のコメントが完全に削除されます)`
+                    )
+                  ) {
+                    void (async () => {
+                      const ok = await deleteBook(book);
+                      if (ok) {
+                        setEditingBid(null);
+                        fetchAll();
+                      }
+                    })();
+                  }
                 }}
               />
               <Divider />
