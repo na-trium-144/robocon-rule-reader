@@ -119,7 +119,7 @@ export const CategoryItem = (props: {
     [onDrop]
   );
 
-  const { editComment, fetchAll } = useApi();
+  const { editComment, fetchAll, deleteComment } = useApi();
   const [hovering, setHovering] = useState<boolean>(false);
   const [text, setText] = useState<string>(category.name);
 
@@ -220,6 +220,17 @@ export const CategoryItem = (props: {
                     fetchAll();
                   }
                 })();
+              }}
+              deleteComment={(comment: Comment) => {
+                if (confirm("このコメントを削除しますか?")) {
+                  void (async () => {
+                    const ok = await deleteComment(comment);
+                    if (ok) {
+                      setEditingCid(null);
+                      fetchAll();
+                    }
+                  })();
+                }
               }}
               startDragging={() => {
                 setDraggingComment({ ...m, category });

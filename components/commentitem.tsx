@@ -16,6 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TextField from "@mui/material/TextField";
 import Link from "next/link";
@@ -28,6 +29,7 @@ export const CommentItem = (props: {
   isEditing: boolean;
   setIsEditing: (e: boolean) => void;
   editComment: (comment: Comment) => void;
+  deleteComment: (comment: Comment) => void;
   isActive: boolean;
   comment: Comment;
   startDragging: () => void;
@@ -37,6 +39,7 @@ export const CommentItem = (props: {
     isEditing,
     setIsEditing,
     editComment,
+    deleteComment,
     isActive,
     comment,
     startDragging,
@@ -102,6 +105,18 @@ export const CommentItem = (props: {
                 }}
               >
                 <CheckIcon />
+              </IconButton>
+            </Grid>
+            <Grid item>
+              <IconButton
+                color="error"
+                size="small"
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  deleteComment({ ...comment });
+                }}
+              >
+                <DeleteIcon />
               </IconButton>
             </Grid>
           </Grid>
