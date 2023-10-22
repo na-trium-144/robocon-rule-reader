@@ -19,6 +19,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import ChatIcon from "@mui/icons-material/Chat";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Link from "next/link";
 import { Rule, ApiReturnMsg, Comment } from "lib/types";
 import { useMediaQuery } from "react-responsive";
@@ -211,6 +212,7 @@ export const RuleItemActive = (props: {
                   props.onDelete();
                 }}
                 color="error"
+                startIcon={<DeleteIcon />}
               >
                 削除
               </Button>

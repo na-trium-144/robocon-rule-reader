@@ -22,6 +22,7 @@ import Link from "next/link";
 import FolderIcon from "@mui/icons-material/Folder";
 import ArticleIcon from "@mui/icons-material/Article";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useState, useEffect } from "react";
 import { Book, BookInfo } from "lib/types";
 import { useDrag, useDrop } from "react-dnd";
@@ -82,9 +83,10 @@ export const BookItem = (props: {
 
 export const BookItemEditing = (props: {
   book: BookInfo;
-  editBook: (book: Book) => void;
+  editBook: (book: BookInfo) => void;
+  deleteBook: (book: BookInfo) => void;
 }) => {
-  const { book, editBook } = props;
+  const { book, editBook, deleteBook } = props;
   const [text, setText] = useState<string>(book.name);
   return (
     <ListItem dense sx={{ cursor: "default" }}>
@@ -112,6 +114,18 @@ export const BookItemEditing = (props: {
             }}
           >
             <CheckIcon />
+          </IconButton>
+        </Grid>
+        <Grid item>
+          <IconButton
+            color="error"
+            size="small"
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
+              deleteBook({ ...book });
+            }}
+          >
+            <DeleteIcon />
           </IconButton>
         </Grid>
       </Grid>
