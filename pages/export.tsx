@@ -24,6 +24,7 @@ export default function RuleEditor() {
         (prev, rule) =>
           prev +
           `#${rule.num}\n` +
+          `##${rule.title}\n` +
           rule.text
             .split("\n")
             .filter((l) => l.length > 0)
