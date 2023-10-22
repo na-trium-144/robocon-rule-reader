@@ -75,11 +75,7 @@ export const CommentItem = (props: {
   return (
     <div ref={drop}>
       {isOver && <Box sx={{ width: "100%", height: "40px" }} />}
-      <ListItemButton
-        dense
-        selected={isActive}
-        sx={{ cursor: "grab", height: 32 }}
-      >
+      <ListItemButton dense selected={isActive} sx={{ cursor: "grab", py: 0 }}>
         {isEditing ? (
           <Grid container alignItems="center">
             <Grid item xs>
@@ -141,19 +137,17 @@ export const CommentItem = (props: {
                 </Button>
               </Link>
               {comment.text}
-              {hovering && (
-                <IconButton
-                  color="primary"
-                  size="small"
-                  sx={{ ml: 1, mr: 1 }}
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    setIsEditing(true);
-                  }}
-                >
-                  <EditIcon />
-                </IconButton>
-              )}
+              <IconButton
+                color="primary"
+                size="small"
+                sx={{ ml: 1, mr: 1, opacity: hovering ? 1 : 0 }}
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  setIsEditing(true);
+                }}
+              >
+                <EditIcon />
+              </IconButton>
             </Typography>
           </Box>
         )}
